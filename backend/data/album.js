@@ -1,0 +1,22 @@
+module.exports = {
+  title: "Neon Drift",
+  artist: "Luna Vale",
+  year: "2025",
+  trackCount: 10,
+  coverImage: "https://placehold.co/600x600/111111/ffffff?text=Album+Cover",
+  gradient: "linear-gradient(180deg, #0f172a 0%, #020617 100%)",
+  tracks: [
+    { id: "t-1", title: "Neon Drift" },
+    { id: "t-2", title: "City Lines" },
+    { id: "t-3", title: "Soft Signals" },
+    { id: "t-4", title: "Midnight Current" },
+    { id: "t-5", title: "Static Bloom" },
+    { id: "t-6", title: "Blue Horizon" },
+    { id: "t-7", title: "Silver Rain" },
+    { id: "t-8", title: "Quiet Skies" },
+    { id: "t-9", title: "Echo Field" },
+    { id: "t-10", title: "Last Light" },
+  ],
+  releaseDate: "Released Jan 10, 2025",
+  label: "Northwind Records",
+};
