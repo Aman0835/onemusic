@@ -18,7 +18,7 @@ function validateSingupData(req) {
     throw new Error("invalid email format");
   } else if (!validator.isStrongPassword(password)) {
     throw new Error("password is not strong enough");
-  } else if (age <= 18 && age >= 100) {
+  } else if (age < 18 || age > 100) {
     throw new Error("18 <= age <= 100");
   } else if (gender !== "male" && gender !== "female" && gender !== "other") {
     throw new Error("invalid gender");

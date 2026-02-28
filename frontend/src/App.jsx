@@ -16,6 +16,7 @@ import Library from "./components/library.jsx";
 import Login from "./components/login.jsx";
 import PlayerBar from "./components/PlayerBar.jsx";
 import RoomLobby from "./components/room/roomLobby.jsx";
+import Signup from "./components/signup.jsx";
 
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
 import "./index.css";
@@ -42,6 +43,8 @@ const AppContent = () => {
     setRepeatMode,
   } = usePlayer();
 
+  const isAuthPage =location.pathname === "/login" || location.pathname === "/signup";
+
   return (
     <div
       className="relative flex overflow-hidden h-screen w-full bg-black text-white font-sans 
@@ -60,7 +63,7 @@ const AppContent = () => {
         }}
       />
 
-      <Sidebar>
+      {!isAuthPage && (<Sidebar>
         <SidebarItem icon={<HouseIcon size={20} />} text="Home" to="/home" />
         <SidebarItem
           icon={<LibraryIcon size={20} />}
@@ -70,9 +73,11 @@ const AppContent = () => {
         <SidebarItem icon={<MicVocal size={20} />} text="Artist" to="/artist" />
         <SidebarItem icon={<AlbumIcon size={20} />} text="Album" to="/album" />
         <SidebarItem icon={<Plus size={20} />} text="Room" to="/room" />
-      </Sidebar>
+      </Sidebar>)}
 
       <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/callback" element={<AuthCallback />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/login" element={<Login />} />
@@ -84,6 +89,7 @@ const AppContent = () => {
         <Route path="/Home" element={<Navigate to="/home" replace />} />
       </Routes>
 
+{!isAuthPage && (
       <PlayerBar
         activeTrack={activeTrack}
         onNext={playNext}
@@ -96,6 +102,7 @@ const AppContent = () => {
         repeatMode={repeatMode}
         setRepeatMode={setRepeatMode}
       />
+)}
     </div>
   );
 };
@@ -103,11 +110,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <Router>
-      <SpotifyAuthProvider>
-        <PlayerProvider>
-          <AppContent />
-        </PlayerProvider>
-      </SpotifyAuthProvider>
+      <PlayerProvider>
+        <AppContent />
+      </PlayerProvider>
     </Router>
   );
 };

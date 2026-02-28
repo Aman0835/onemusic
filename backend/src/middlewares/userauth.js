@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../modles/user");
+const User = require("../modules/user");
 
 
 const userauth = async (req,res,next)=>{

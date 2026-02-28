@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       validate: {
         validator: function (v) {
-          validator.isStrongPassword(v);
+          return validator.isStrongPassword(v);
         },
       },
     },

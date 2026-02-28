@@ -6,6 +6,7 @@ const { startWebSocketServer } = require("./webSocket/chats");
 const YTMusic = require("ytmusic-api");
 const dataRoutes = require("./routes/data.routes");
 const userRoutes = require("./routes/user.routes");
+const { authRouter } = require("./routes/auth");
 
 const app = express();
 const ytmusic = new YTMusic();
@@ -37,6 +38,9 @@ app.use(cookieParser());
 
 app.use("/api/data", dataRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/auth", authRouter);
+
+
 
 app.get("/search", async (req, res) => {
   try {
