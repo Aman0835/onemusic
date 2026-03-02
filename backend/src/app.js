@@ -7,38 +7,41 @@ const YTMusic = require("ytmusic-api");
 const dataRoutes = require("./routes/data.routes");
 const userRoutes = require("./routes/user.routes");
 const { authRouter } = require("./routes/auth");
+const roomRoutes = require("./routes/room.routes");
+
 
 const app = express();
 const ytmusic = new YTMusic();
 
 const envOrigins = (process.env.CLIENT_ORIGIN || "")
-  .split(",")
+.split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = new Set([
-  ...envOrigins,
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "http://192.168.0.103:5173",
-]);
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.has(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-  }),
-);
-app.use(express.json());
+  const allowedOrigins = new Set([
+    ...envOrigins,
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://192.168.0.103:5173",
+  ]);
+  
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.has(origin)) return callback(null, true);
+        return callback(new Error("Not allowed by CORS"));
+      },
+      credentials: true,
+    }),
+  );
+  app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/data", dataRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRouter);
+app.use("/api/rooms", roomRoutes);
 
 
 

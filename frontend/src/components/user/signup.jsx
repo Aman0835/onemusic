@@ -1,12 +1,16 @@
 import { useState } from "react";
 
+const AUTH_API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  `${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/api/auth`;
+
 export default function Signup() {
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     gender: "",
-    password: ""
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -18,7 +22,7 @@ export default function Signup() {
     setMessage("");
 
     try {
-      const res = await fetch("http://localhost:5000/auth/signup", {
+      const res = await fetch(`${AUTH_API_BASE}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -50,17 +54,13 @@ export default function Signup() {
             required
             placeholder="First Name"
             className="input"
-            onChange={(e) =>
-              setForm({ ...form, firstName: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, firstName: e.target.value })}
           />
           <input
             required
             placeholder="Last Name"
             className="input"
-            onChange={(e) =>
-              setForm({ ...form, lastName: e.target.value })
-            }
+            onChange={(e) => setForm({ ...form, lastName: e.target.value })}
           />
         </div>
 

@@ -4,6 +4,7 @@ import { usePlayer } from "../../context/PlayerContext";
 import PlayerBar from "../PlayerBar";
 import Chat from "../chats/chat";
 import SearchBar from "../SearchBar";
+import { addMusicToQueueAPI, getRoomDetailsAPI } from "../../api/room";
 
 const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
   const wsRef = useRef(null);
@@ -49,11 +50,16 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
   }, [roomName]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/data/room-playlist")
-      .then((res) => res.json())
-      .then((data) => setPlaylist(data))
-      .catch((err) => console.error("Failed to load playlist", err));
-  }, []);
+    const loadRoom = async () => {
+      try {
+        const room = await getRoomDetailsAPI(roomName);
+        setPlaylist(room.queue || []);
+      } catch (err) {
+        console.error("Room load failed:", err);
+      }
+    };
+    loadRoom();
+  }, [roomName]);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/user/user-connected")
@@ -64,26 +70,27 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
 
   const handleSelectTrack = (id) => {
     const index = playlist.findIndex((t) => t.id === id);
-    if (index !== -1) {
-      setQueueAndPlay(playlist, index);
-    }
+    if (index !== -1) setQueueAndPlay(playlist, index);
   };
 
-  const handleSelectFromSearch = (track) => {
-    const exists = playlist.some((item) => item.id === track.id);
-    if (exists) {
+  const handleSelectFromSearch = async (track) => {
+    const alreadyExists = playlist.some((item) => item.id === track.id);
+
+    if (alreadyExists) {
+      // Just play the song instead of adding again
       handleSelectTrack(track.id);
       return;
     }
 
-    setPlaylist((prev) => {
-      const updated = [...prev, track];
-      const index = updated.findIndex((t) => t.id === track.id);
-      if (index !== -1) {
-        setQueueAndPlay(updated, index);
-      }
-      return updated;
-    });
+    try {
+      const updatedRoom = await addMusicToQueueAPI(roomName, track);
+      setPlaylist(updatedRoom.queue);
+
+      const index = updatedRoom.queue.findIndex((t) => t.id === track.id);
+      if (index !== -1) setQueueAndPlay(updatedRoom.queue, index);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -153,7 +160,7 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
 
               return (
                 <div
-                  key={track.id}
+                  key={`${track.id}-${index}`}
                   onClick={() => handleSelectTrack(track.id)}
                   className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
                     isActive

@@ -1,82 +1,86 @@
-import React, { useState } from "react";
+import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { addUser } from "../utils/UserSlice";
+
+const AUTH_API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  `${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/api/auth`;
+
+function extractUser(payload) {
+  return payload?.user || payload || null;
+}
 
 export default function Login() {
+  const [emailId, setEmailId] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isSignup, setIsSignup] = useState(false);
-
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    firstName: "",
-    lastName: "",
-    gender: "",
-  });
-
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-
-  async function handleLogin(e) {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
-
+  const handleLogin = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: form.email,
-          password: form.password,
-        }),
-      });
+      setError("");
+      const req = await axios.post(
+        AUTH_API_BASE + "/login",
+        {
+          email: emailId,
+          password,
+        },
+        { withCredentials: true },
+      );
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
+      const user = extractUser(req.data);
+      if (!user) throw new Error("Invalid login response");
 
-      
+      dispatch(addUser(user));
+      navigate("/home");
+    } catch (error) {
+      setError(error?.response?.data || error?.message || "something went wrong");
+      console.error(error);
+    }
+  };
 
-      setMessage("Login successful!");
-      window.location.href = "/home";
-    } catch (err) {
-      setMessage(err.message);
+  const handleSignup = async () => {
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
     }
 
-    setLoading(false);
-  }
+    try {
+      setError("");
+      const req = await axios.post(
+        AUTH_API_BASE + "/signup",
+        {
+          email: emailId,
+          password,
+          firstName,
+          lastName,
+          gender,
+        },
+        { withCredentials: true },
+      );
 
-async function handleLogin(e) {
-  e.preventDefault();
-  setLoading(true);
-  setMessage("");
+      const user = extractUser(req.data);
+      if (!user) throw new Error("Invalid signup response");
 
-  try {
-    const res = await fetch("http://localhost:5000/api/auth/login", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: form.email,
-        password: form.password,
-      }),
-    });
+      dispatch(addUser(user));
+      navigate("/home");
+    } catch (error) {
+      setError(error?.response?.data || error?.message || "something went wrong");
+      console.error(error);
+    }
+  };
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Login failed");
-
-    localStorage.setItem("user", JSON.stringify(data.user));  
-
-    setMessage("Login successful!");
-    window.location.href = "/home";
-  } catch (err) {
-    setMessage(err.message);
-  }
-
-  setLoading(false);
-}
   return (
     <div className="w-full h-screen flex items-center justify-center bg-white/10 text-black">
       <div className="flex flex-col items-center">
@@ -113,13 +117,14 @@ async function handleLogin(e) {
           </h2>
 
           {!isSignup && (
-            <form className="flex flex-col gap-4" onSubmit={handleLogin}>
+            <div className="flex flex-col gap-4">
               <input
                 type="email"
                 placeholder="Email"
                 required
                 className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setEmailId(e.target.value)}
+                value={emailId}
               />
 
               <div className="relative w-full">
@@ -128,9 +133,8 @@ async function handleLogin(e) {
                   placeholder="Password"
                   required
                   className="w-full h-12 px-4 pr-12 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
                 />
 
                 <button
@@ -141,24 +145,25 @@ async function handleLogin(e) {
                 </button>
               </div>
 
+              <p className="text-red-600">{error}</p>
+
               <button
-                disabled={loading}
+                onClick={handleLogin}
                 className="w-40 mx-auto h-12 bg-white border-4 border-black rounded-lg font-semibold shadow-[5px_5px_0px_#000] hover:translate-y-1 transition">
-                {loading ? "Logging in..." : "Let`s go!"}
+                Login
               </button>
-            </form>
+            </div>
           )}
 
           {isSignup && (
-            <form className="flex flex-col gap-4" onSubmit={handleSignup}>
+            <div className="flex flex-col gap-4">
               <input
                 type="text"
                 placeholder="First Name"
                 required
                 className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) =>
-                  setForm({ ...form, firstName: e.target.value })
-                }
+                onChange={(e) => setFirstName(e.target.value)}
+                value={firstName}
               />
 
               <input
@@ -166,7 +171,8 @@ async function handleLogin(e) {
                 placeholder="Last Name"
                 required
                 className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                onChange={(e) => setLastName(e.target.value)}
+                value={lastName}
               />
 
               <input
@@ -174,7 +180,8 @@ async function handleLogin(e) {
                 placeholder="Email"
                 required
                 className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                onChange={(e) => setEmailId(e.target.value)}
+                value={emailId}
               />
 
               <div className="relative w-full">
@@ -183,47 +190,49 @@ async function handleLogin(e) {
                   placeholder="Password"
                   required
                   className="w-full h-12 px-4 pr-12 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowSignupPassword(!showSignupPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black">
-                  {showSignupPassword ? (
-                    <EyeOff size={22} />
-                  ) : (
-                    <Eye size={22} />
-                  )}
+                  {showSignupPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                 </button>
               </div>
-
-              <select
+              <input
+                type={showSignupPassword ? "text" : "password"}
+                placeholder="Confirm Password"
                 required
+                className="w-full h-12 px-4 pr-12 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={confirmPassword}
+              />
+
+              <input
+                required
+                type="text"
+                placeholder="Gender ex(male,female,other)"
                 className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setForm({ ...form, gender: e.target.value })}>
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
+                onChange={(e) => setGender(e.target.value)}
+                value={gender}></input>
+              <p className="text-red-600">{error}</p>
 
               <button
-                disabled={loading}
+                onClick={handleSignup}
                 className="w-40 mx-auto h-12 bg-white border-4 border-black rounded-lg font-semibold shadow-[5px_5px_0px_#000] hover:translate-y-1 transition">
-                {loading ? "Creating..." : "Confirm!"}
+                Sign Up
               </button>
-            </form>
-          )}
-
-          {message && (
-            <p className="text-center text-red-600 font-semibold mt-4">
-              {message}
-            </p>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 }
+
+
+
+
+

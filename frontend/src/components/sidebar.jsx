@@ -1,12 +1,13 @@
 import { Headset } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import "../index.css";
 import Button from "./Login/Button";
 import ProfileCard from "./cards/profileCard";
 
 export default function Sidebar({ children }) {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = useSelector((store) => store.user);
 
   return (
     <aside className="h-screen w-16 md:w-60">
@@ -31,7 +32,7 @@ export default function Sidebar({ children }) {
         ) : (
           <NavLink to="/login" className="hidden md:block">
             <div className="p-2 md:p-4 text-white hover:text-[#04A72E]">
-              {Button()}
+              {Button({ text: "Login" })}
             </div>
           </NavLink>
         )}
