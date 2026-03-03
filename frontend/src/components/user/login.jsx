@@ -117,7 +117,12 @@ export default function Login() {
           </h2>
 
           {!isSignup && (
-            <div className="flex flex-col gap-4">
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleLogin();
+              }}>
               <input
                 type="email"
                 placeholder="Email"
@@ -148,15 +153,20 @@ export default function Login() {
               <p className="text-red-600">{error}</p>
 
               <button
-                onClick={handleLogin}
+                type="submit"
                 className="w-40 mx-auto h-12 bg-white border-4 border-black rounded-lg font-semibold shadow-[5px_5px_0px_#000] hover:translate-y-1 transition">
                 Login
               </button>
-            </div>
+            </form>
           )}
 
           {isSignup && (
-            <div className="flex flex-col gap-4">
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSignup();
+              }}>
               <input
                 type="text"
                 placeholder="First Name"
@@ -220,19 +230,17 @@ export default function Login() {
               <p className="text-red-600">{error}</p>
 
               <button
-                onClick={handleSignup}
+                type="submit"
                 className="w-40 mx-auto h-12 bg-white border-4 border-black rounded-lg font-semibold shadow-[5px_5px_0px_#000] hover:translate-y-1 transition">
                 Sign Up
               </button>
-            </div>
+            </form>
           )}
         </div>
       </div>
     </div>
   );
 }
-
-
 
 
 

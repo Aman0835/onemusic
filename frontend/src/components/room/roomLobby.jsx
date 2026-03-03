@@ -27,15 +27,25 @@ export default function RoomLobby() {
   // FETCH ROOMS ON LOAD
   // -------------------------
   useEffect(() => {
+    const userId = user?.id || user?._id;
+    if (!userId) {
+      setRooms([]);
+      return;
+    }
+
     (async () => {
       try {
         const data = await getMyRooms();
         setRooms(data);
       } catch (e) {
+        if (e?.response?.status === 401) {
+          setRooms([]);
+          return;
+        }
         console.log("Failed to fetch rooms:", e);
       }
     })();
-  }, []);
+  }, [user]);
 
   // -------------------------
   // CREATE ROOM
@@ -130,6 +140,7 @@ export default function RoomLobby() {
                 setRoomName(e.target.value);
                 setError("");
               }}
+              onKeyDown={(e) => e.key === "Enter" && createRoom()}
             />
 
             <button

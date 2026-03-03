@@ -6,7 +6,7 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import AuthCallback from "./auth/AuthCallback.jsx";
+
 import { PlayerProvider, usePlayer } from "./context/PlayerContext.jsx";
 
 import Album from "./components/album.jsx";
@@ -20,6 +20,7 @@ import Signup from "./components/user/signup.jsx";
 
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
 import "./index.css";
+import AuthCallback from "./auth/AuthCallback.jsx";
 
 import {
   Album as AlbumIcon,
@@ -150,3 +151,4 @@ const App = () => {
 };
 
 export default App;
+
