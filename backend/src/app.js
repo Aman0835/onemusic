@@ -8,6 +8,9 @@ const dataRoutes = require("./routes/data.routes");
 const userRoutes = require("./routes/user.routes");
 const { authRouter } = require("./routes/auth");
 const roomRoutes = require("./routes/room.routes");
+const chatRooms = require("./routes/chats.routes");
+
+
 
 
 const app = express();
@@ -42,6 +45,8 @@ app.use("/api/data", dataRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRouter);
 app.use("/api/rooms", roomRoutes);
+app.use("/api/chat", chatRooms);
+
 
 
 
@@ -65,15 +70,16 @@ app.get("/search", async (req, res) => {
 connectDB()
   .then(() => {
     const PORT = process.env.PORT || 5000;
-    const server = app.listen(5000, "0.0.0.0", () => {
-      console.log("Server running on port 5000");
-    });
 
+    const server = app.listen(PORT, "0.0.0.0", () => {
+      console.log("Server running on port", PORT);
+    });
     try {
-      startWebSocketServer();
+      startWebSocketServer(server);   
     } catch (err) {
       console.error("Failed to start WebSocket server:", err);
     }
+
   })
   .catch((err) => {
     console.error("Failed to connect to the database:", err);

@@ -13,7 +13,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 export default function RoomLobby() {
-  const user = useSelector((store) => store.user); // ✔ Hook at top level
+  const user = useSelector((store) => store.user); 
   const navigate = useNavigate();
 
   const [rooms, setRooms] = useState([]);
@@ -220,7 +220,7 @@ export default function RoomLobby() {
         </section>
       </div>
 
-      {/* LOGIN REQUIRED MODAL */}
+     
       {showLoginModal &&
         createPortal(
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[9999]">

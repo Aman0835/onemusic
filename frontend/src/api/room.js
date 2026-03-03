@@ -20,3 +20,6 @@ export const getRoomDetailsAPI = async (name) =>
 
 export const addMusicToQueueAPI = async (name, song) =>
   (await axios.post(`${API}/${name}/queue`, { song }, { withCredentials: true })).data;
+
+export const deleteMusicFromQueueAPI = async (name, songId) =>
+  (await axios.delete(`${API}/${name}/queue/${songId}`, { withCredentials: true })).data;

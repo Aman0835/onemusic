@@ -63,6 +63,7 @@ const Home = () => {
   return (
     <main className="w-full h-screen overflow-y-auto scrollbar-hide p-4 sm:p-6">
       <SearchBar
+        showPlusIcon={false}
         onResultsChange={setSearchResults}
         onSelectTrack={(track) => {
           const index = searchResults.findIndex((i) => i.id === track.id);

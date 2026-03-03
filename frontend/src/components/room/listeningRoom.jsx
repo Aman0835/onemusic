@@ -1,10 +1,14 @@
-import { Play } from "lucide-react";
+import { Play,Trash,Minus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePlayer } from "../../context/PlayerContext";
 import PlayerBar from "../PlayerBar";
 import Chat from "../chats/chat";
 import SearchBar from "../SearchBar";
-import { addMusicToQueueAPI, getRoomDetailsAPI } from "../../api/room";
+import {
+  addMusicToQueueAPI,
+  deleteMusicFromQueueAPI,
+  getRoomDetailsAPI,
+} from "../../api/room";
 
 const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
   const wsRef = useRef(null);
@@ -93,6 +97,15 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     }
   };
 
+  const handleDeleteFromPlaylist = async (songId) => {
+    try {
+      const updatedRoom = await deleteMusicFromQueueAPI(roomName, songId);
+      setPlaylist(updatedRoom.queue);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex h-full w-full text-gray-300 overflow-hidden">
       <aside className="w-64 border-r border-gray-800 p-4 flex flex-col justify-between shrink-0">
@@ -152,6 +165,7 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
           <SearchBar
             onSelectTrack={handleSelectFromSearch}
             playlist={playlist}
+            
           />
 
           <div className="space-y-1">
@@ -195,6 +209,15 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
                   <span className="text-xs text-zinc-500">
                     {isActive ? "PLAYING" : track.duration}
                   </span>
+                  <span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteFromPlaylist(track.id);
+                      }} className="  hover:bg-red-50  transition-colors rounded-full p-1 cursor-pointer">
+                      <Minus size={16} className="text-red-400 hover:text-[#1db954]" />
+                    </button>
+                  </span>
                 </div>
               );
             })}
@@ -214,7 +237,7 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
           onVolumeChange={setVolume}
         />
       </main>
-      <Chat />
+      <Chat roomName={roomName} />
     </div>
   );
 };

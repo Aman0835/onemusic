@@ -2,7 +2,7 @@ const User = require("../modules/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey123";
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey9029";
 const COOKIE_TIME = 7 * 24 * 60 * 60 * 1000;
 
 exports.registerUser = async (req, res) => {

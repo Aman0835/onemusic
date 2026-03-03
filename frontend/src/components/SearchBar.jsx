@@ -7,13 +7,15 @@ export default function SearchBar({
   onSelectTrack,
   playlist = [],
   onResultsChange,
-  showActionButton = true,
+  showPlusIcon = true,
+  showActionButton,
   placeholder = "Search for a song...",
 }) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const ref = useRef(null);
+  const shouldShowPlusIcon = showActionButton ?? showPlusIcon;
 
   useEffect(() => {
     function handleClick(e) {
@@ -66,7 +68,7 @@ export default function SearchBar({
   };
 
   return (
-    <div ref={ref} className="relative mb-8">
+    <div ref={ref} className="relative mb-8 ">
       <Search
         className="absolute z-1 left-4 top-3.5 text-white/70 drop-shadow-sm"
         size={17}
@@ -84,40 +86,38 @@ export default function SearchBar({
       />
 
       {open && searchResults.length > 0 && (
-        <div
-          className="absolute w-full mt-2 p-3 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/20 shadow-z-50 max-h-64 overflow-y-auto animate-dropdown">
+        <div className="absolute w-full mt-2 p-3 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/20 shadow-z-50 max-h-64 overflow-y-auto animate-dropdown scrollbar-hide z-50">
           {searchResults.map((track) => (
             <button
-  key={track.id}
-  onClick={() => onSelectTrack(track)} 
-  className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 cursor-pointer text-left">
-  <img
-    src={track.imageUrl}
-    alt={track.title}
-    className="w-10 h-10 rounded"
-  />
+              key={track.id}
+              onClick={() => onSelectTrack(track)}
+              className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/10 cursor-pointer text-left">
+              <img
+                src={track.imageUrl}
+                alt={track.title}
+                className="w-10 h-10 rounded"
+              />
 
-  <div className="flex-1">
-    <span className="text-sm text-white">{track.title}</span>
-    <p className="text-xs text-gray-500">{track.subtitle}</p>
-  </div>
+              <div className="flex-1">
+                <span className="text-sm text-white">{track.title}</span>
+                <p className="text-xs text-gray-500">{track.subtitle}</p>
+              </div>
 
-  {showActionButton && (
-    <button
-      onClick={(e) => {
-        e.stopPropagation(); 
-        onSelectTrack(track);
-      }}
-      className="ml-auto"
-    >
-      {isAddedToPlaylist(track.id) ? (
-        <Check size={20} className="text-green-500" />
-      ) : (
-        <Plus size={20} className="text-white" />
-      )}
-    </button>
-  )}
-</button>
+              {shouldShowPlusIcon && (
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectTrack(track);
+                  }}
+                  className="ml-auto cursor-pointer">
+                  {isAddedToPlaylist(track.id) ? (
+                    <Check size={20} className="text-green-500" />
+                  ) : (
+                    <Plus size={20} className="text-white" />
+                  )}
+                </div>
+              )}
+            </button>
           ))}
         </div>
       )}

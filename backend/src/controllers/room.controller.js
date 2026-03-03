@@ -99,6 +99,30 @@ const addMusicToQueue = async (req, res) => {
     return res.status(500).json({ error: "Server error" });
   }
 };
+
+const deleteMusicFromQueue = async (req, res) => {
+  const { name, songId } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const room = await Room.findOne({ name });
+    if (!room) return res.status(404).json({ error: "Room not found" });
+
+    if (room.host.toString() !== userId.toString()) {
+      return res
+        .status(403)
+        .json({ error: "Only host can delete music from queue" });
+    }
+
+    room.queue = room.queue.filter((s) => s.id !== songId);
+    await room.save();
+
+    return res.json(room);
+  } catch (err) {
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+
 const getRoomDetails = async (req, res) => {
   const { name } = req.params;
 
@@ -119,4 +143,5 @@ module.exports = {
   deleteRoom,
   addMusicToQueue,
   getRoomDetails,
+  deleteMusicFromQueue,
 };
