@@ -15,6 +15,18 @@ export const PlayerProvider = ({ children }) => {
   const [currentIndex, setCurrentIndex] = useState(-1);
   const activeTrack = queue[currentIndex] || null;
 
+  const [isRoomMode, setIsRoomMode] = useState(false);
+  const isRoomModeRef = useRef(false);
+  
+  // Suppress immediate autoplay behaviors when migrating states
+  const autoPlaySuppressRef = useRef(false);
+
+  const [globalQueue, setGlobalQueue] = useState([]);
+  const globalQueueRef = useRef([]);
+
+  const [globalCurrentIndex, setGlobalCurrentIndex] = useState(-1);
+  const globalCurrentIndexRef = useRef(-1);
+
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [currentTime, setCurrentTime] = useState(0);
@@ -135,29 +147,50 @@ export const PlayerProvider = ({ children }) => {
       // Some tracks report 0 briefly before metadata settles.
       if (d === 0) {
         unstartedAttemptsRef.current += 1;
-        if (unstartedAttemptsRef.current <= 3) {
+        if (unstartedAttemptsRef.current <= 15) {
           playerRef.current.playVideo();
           return;
         }
         unstartedAttemptsRef.current = 0;
         if (repeatModeRef.current !== "one") playNext();
       }
-    }, 900);
+    }, 150);
   };
 
   useEffect(() => {
-    if (!activeTrack || !playerReady) return;
+    if (!playerReady) return;
+
+    if (!activeTrack) {
+      if (playerRef.current && window.YT) {
+        try {
+          // If queue is completely empty, forcefully kill the active feed
+          playerRef.current.stopVideo();
+        } catch (e) {
+          console.warn("Failed to stop video on empty queue", e);
+        }
+      }
+      return;
+    }
+
+    if (autoPlaySuppressRef.current) {
+      console.log("Suppressed autoplay for track transition:", activeTrack.id);
+      return;
+    }
+
+    const currentUrl = playerRef.current?.getVideoUrl?.() || "";
+    const isNewTrack = !currentUrl.includes(activeTrack.id);
+
     unstartedAttemptsRef.current = 0;
 
-    playerRef.current.loadVideoById(activeTrack.id);
-
-    setTimeout(() => {
+    // Only load and auto-play if the track actually changed.
+    if (isNewTrack) {
+      playerRef.current.loadVideoById(activeTrack.id);
       try {
         playerRef.current.playVideo();
       } catch (e) {
         console.warn("Autoplay blocked, waiting for user interaction");
       }
-    }, 400);
+    }
   }, [activeTrack, playerReady]);
 
   const togglePlayPause = () => {
@@ -166,6 +199,16 @@ export const PlayerProvider = ({ children }) => {
     const state = playerRef.current.getPlayerState();
     if (state === window.YT.PlayerState.PLAYING) playerRef.current.pauseVideo();
     else playerRef.current.playVideo();
+  };
+
+  const play = () => {
+    if (!playerRef.current || !window.YT) return;
+    playerRef.current.playVideo();
+  };
+
+  const pause = () => {
+    if (!playerRef.current || !window.YT) return;
+    playerRef.current.pauseVideo();
   };
 
   const setVolume = (v) => {
@@ -180,28 +223,111 @@ export const PlayerProvider = ({ children }) => {
   };
 
   const setQueueAndPlay = (tracks, index) => {
-    if (!Array.isArray(tracks) || tracks.length === 0) return;
+    console.log("setQueueAndPlay invoked with tracks:", tracks?.length, "index:", index);
+    if (!Array.isArray(tracks) || tracks.length === 0) {
+      console.log("setQueueAndPlay failed: tracks not array or empty");
+      return;
+    }
 
     const selected = tracks[index];
     const filtered = tracks.filter((track) => track?.id);
-    if (!filtered.length) return;
+    if (!filtered.length) {
+      console.log("setQueueAndPlay failed: no valid tracks with id");
+      return;
+    }
 
     const nextIndex = filtered.findIndex((track) => track.id === selected?.id);
     const safeIndex = nextIndex >= 0 ? nextIndex : 0;
     const targetTrack = filtered[safeIndex];
 
+    console.log("setQueueAndPlay playing targetTrack:", targetTrack?.id, "at safeIndex:", safeIndex);
+
     // Try to start immediately on user click to avoid autoplay-policy timing issues.
     if (playerReady && playerRef.current && targetTrack?.id) {
       try {
+        console.log("setQueueAndPlay: Attempting immediate player spinup");
         playerRef.current.loadVideoById(targetTrack.id);
         playerRef.current.playVideo();
       } catch (e) {
-        console.warn("Immediate play failed, fallback to state-driven play");
+        console.warn("Immediate play failed, fallback to state-driven play", e);
       }
+    } else {
+      console.log("setQueueAndPlay: Delaying play due to playerReady:", playerReady, "targetTrack:", targetTrack?.id);
     }
 
     setQueue(filtered);
     setCurrentIndex(safeIndex);
+  };
+
+  const enterRoomMode = () => {
+    if (isRoomModeRef.current) return;
+    autoPlaySuppressRef.current = true;
+    setTimeout(() => { autoPlaySuppressRef.current = false; }, 500);
+    
+    unstartedAttemptsRef.current = 0;
+    
+    // Stop any playing personal track before entering room
+    if (playerReady && playerRef.current && window.YT) {
+      try {
+        const state = playerRef.current.getPlayerState();
+        if (
+          state === window.YT.PlayerState.PLAYING || 
+          state === window.YT.PlayerState.BUFFERING ||
+          state === window.YT.PlayerState.UNSTARTED
+        ) {
+          playerRef.current.stopVideo();
+        }
+      } catch (e) {
+        console.warn("Failed to stop on room entry", e);
+      }
+    }
+    
+    setIsPlaying(false);
+
+    setGlobalQueue(queueRef.current);
+    globalQueueRef.current = queueRef.current;
+    
+    setGlobalCurrentIndex(currentIndexRef.current);
+    globalCurrentIndexRef.current = currentIndexRef.current;
+    
+    setQueue([]);
+    setCurrentIndex(-1);
+    
+    setIsRoomMode(true);
+    isRoomModeRef.current = true;
+  };
+
+  const exitRoomMode = () => {
+    if (!isRoomModeRef.current) return;
+    autoPlaySuppressRef.current = true;
+    setTimeout(() => { autoPlaySuppressRef.current = false; }, 500);
+    
+    unstartedAttemptsRef.current = 0;
+    
+    const restoredQueue = globalQueueRef.current;
+    if (!restoredQueue || restoredQueue.length === 0) {
+      if (playerReady && playerRef.current) playerRef.current.stopVideo();
+    }
+    
+    const restoredIndex = globalCurrentIndexRef.current;
+    
+    setQueue(restoredQueue);
+    setCurrentIndex(restoredIndex);
+    
+    setIsRoomMode(false);
+    isRoomModeRef.current = false;
+
+    // Auto-resume personal tracks on room exit.
+    const resumedTrack = restoredQueue[restoredIndex];
+    if (playerReady && playerRef.current && resumedTrack?.id) {
+      setTimeout(() => {
+        try {
+          playerRef.current.cueVideoById(resumedTrack.id);
+        } catch (e) {
+          console.warn("Auto-cue after exit failed", e);
+        }
+      }, 50);
+    }
   };
 
   const playNext = () => {
@@ -313,6 +439,8 @@ export const PlayerProvider = ({ children }) => {
           : null,
         isPlaying,
         togglePlayPause,
+        play,
+        pause,
         playNext,
         playPrev,
         setVolume,
@@ -324,7 +452,22 @@ export const PlayerProvider = ({ children }) => {
         setShuffle,
         repeatMode,
         setRepeatMode,
+        isRoomMode,
+        enterRoomMode,
+        exitRoomMode,
       }}>
+      <div
+        id="yt-player"
+        style={{
+          position: "fixed",
+          top: "-9999px",
+          left: "-9999px",
+          width: "1px",
+          height: "1px",
+          opacity: 0.01,
+          pointerEvents: "none",
+        }}
+      />
       {children}
     </PlayerContext.Provider>
   );

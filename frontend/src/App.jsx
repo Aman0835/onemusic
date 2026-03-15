@@ -49,6 +49,7 @@ const AppContent = () => {
     setShuffle,
     repeatMode,
     setRepeatMode,
+    isRoomMode,
   } = usePlayer();
 
   const location = useLocation();
@@ -59,6 +60,8 @@ const AppContent = () => {
 
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/signup";
+  const isRoomPage = location.pathname.startsWith("/room/") && location.pathname !== "/room";
+  const hideSidebar = isAuthPage || isRoomPage;
 
   useEffect(() => {
     if (!authApiBase || isAuthPage) return;
@@ -83,20 +86,8 @@ const AppContent = () => {
       className="relative flex overflow-hidden h-screen w-full bg-black text-white font-sans 
       bg-gradient-to-br from-indigo-900/60 via-black to-black
       animate-gradient-xy pb-24">
-      <div
-        id="yt-player"
-        style={{
-          position: "fixed",
-          top: "-9999px",
-          left: "-9999px",
-          width: "1px",
-          height: "1px",
-          opacity: 0.01,
-          pointerEvents: "none",
-        }}
-      />
 
-      {!isAuthPage && (
+      {!hideSidebar && (
         <Sidebar>
           <SidebarItem icon={<HouseIcon size={20} />} text="Home" to="/home" />
           <SidebarItem
@@ -124,7 +115,7 @@ const AppContent = () => {
         <Route path="/Home" element={<Navigate to="/home" replace />} />
       </Routes>
 
-      {!isAuthPage && (
+      {!hideSidebar && (
         <PlayerBar
           activeTrack={activeTrack}
           onNext={playNext}
@@ -136,6 +127,7 @@ const AppContent = () => {
           setShuffle={setShuffle}
           repeatMode={repeatMode}
           setRepeatMode={setRepeatMode}
+          isRoomMode={isRoomMode}
         />
       )}
     </div>

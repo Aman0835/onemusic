@@ -22,6 +22,7 @@ const PlayerBar = ({
   setShuffle,
   repeatMode,
   setRepeatMode,
+  isRoomMode,
 }) => {
   const [volume, setVolumeLocal] = useState(66);
   const [oldVolume, setOldVolume] = useState(66);
@@ -38,7 +39,7 @@ const PlayerBar = ({
   };
 
   return (
-    <footer className="fixed bottom-0 left-16 md:left-60 right-0 h-24 bg-black/30 backdrop-blur-md border-t border-white/10">
+    <footer className="fixed bottom-0 left-16 md:left-60 right-0 h-22 bg-black/30 backdrop-blur-md border-t border-white/10">
       <div className="h-full grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-2 sm:px-4 md:px-6">
       <div className="min-w-0 flex items-center gap-2 md:gap-3">
         {activeTrack && (
@@ -50,9 +51,16 @@ const PlayerBar = ({
             />
 
             <div className="hidden sm:flex flex-col min-w-0">
-              <p className="text-white font-semibold truncate max-w-[160px] md:max-w-[220px]">
-                {activeTrack.title}
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-white font-semibold truncate max-w-[140px] md:max-w-[200px]">
+                  {activeTrack.title}
+                </p>
+                {isRoomMode && (
+                  <span className="px-1.5 py-0.5 text-[9px] font-black bg-red-500/20 text-red-400 rounded-sm border border-red-500/30 uppercase tracking-wider shrink-0">
+                    Live
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-gray-400 truncate max-w-[160px] md:max-w-[220px]">
                 {activeTrack.subtitle || "Unknown Artist"}
               </p>

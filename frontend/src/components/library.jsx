@@ -4,6 +4,7 @@ import { getLibraryData } from "../api/musicData";
 import { usePlayer } from "../context/PlayerContext";
 import Loader from "./loader";
 import SearchBar from "./SearchBar";
+import { useScrollGrab } from "../hooks/useScrollGrab";
 
 const FILTERS = ["Playlists", "Albums", "Artists", "Downloaded"];
 
@@ -52,6 +53,8 @@ export default function LibraryPage() {
   const [libraryItems, setLibraryItems] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
   const [error, setError] = useState(null);
+
+  const { ref: gridScrollRef, isDragging: isGridDragging } = useScrollGrab();
 
   // ⭐ Cleaned — NO ACCESS TOKEN
   useEffect(() => {
@@ -163,13 +166,19 @@ export default function LibraryPage() {
           </div>
 
           {viewMode === "grid" ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            <div 
+              ref={gridScrollRef}
+              className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-6 snap-x cursor-grab active:cursor-grabbing"
+            >
               {filteredItems.map((item) => (
-                <LibraryItemCard
-                  key={item.id}
-                  item={item}
-                  onClick={() => handlePlayLibraryItem(item)}
-                />
+                <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px] snap-start">
+                  <LibraryItemCard
+                    item={item}
+                    onClick={() => {
+                      if (!isGridDragging) handlePlayLibraryItem(item);
+                    }}
+                  />
+                </div>
               ))}
             </div>
           ) : (
@@ -237,24 +246,25 @@ const FilterPills = ({ activeFilter, setActiveFilter }) => (
 const LibraryItemCard = ({ item, onClick }) => (
   <div
     onClick={onClick}
-    className="bg-zinc-900/50 hover:bg-zinc-800 transition-colors p-4 rounded-lg flex flex-col gap-4 cursor-pointer"
+    className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2"
   >
-    <div className="relative">
+    <div className="relative w-full aspect-square overflow-hidden rounded-md shadow-lg">
       <img
         src={item.imageUrl}
         alt={item.title}
-        className="w-full aspect-square object-cover rounded-md"
+        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
+      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       {item.isDownloaded && (
-        <div className="absolute bottom-2 right-2 bg-green-500 p-1.5 rounded-full shadow-lg">
+        <div className="absolute bottom-2 right-2 bg-green-500 p-1.5 rounded-full shadow-lg z-10">
           <Download size={14} className="text-black" />
         </div>
       )}
     </div>
 
-    <div>
-      <h3 className="font-bold truncate">{item.title}</h3>
-      <p className="text-sm text-zinc-400 truncate">
+    <div className="flex flex-col gap-0.5 w-full text-left mt-1">
+      <h3 className="font-semibold text-white text-sm truncate w-full">{item.title}</h3>
+      <p className="text-xs text-zinc-400 truncate w-full">
         {item.type} - {item.creator}
       </p>
     </div>

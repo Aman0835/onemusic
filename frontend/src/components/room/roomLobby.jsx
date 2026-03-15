@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import ListeningRoom from "./listeningRoom.jsx";
 import {
   getMyRooms,
   createRoomAPI,
@@ -19,7 +18,6 @@ export default function RoomLobby() {
   const [rooms, setRooms] = useState([]);
   const [roomName, setRoomName] = useState("");
   const [joinName, setJoinName] = useState("");
-  const [activeRoom, setActiveRoom] = useState(null);
   const [error, setError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -57,8 +55,8 @@ export default function RoomLobby() {
     try {
       const newRoom = await createRoomAPI(roomName);
       setRooms((prev) => [...prev, newRoom]);
-      setActiveRoom(newRoom.name);
       setRoomName("");
+      navigate(`/room/${newRoom.name}`);
     } catch (e) {
       console.error(e);
     }
@@ -69,8 +67,8 @@ export default function RoomLobby() {
 
     try {
       const room = await joinRoomAPI(joinName);
-      setActiveRoom(room.name);
       setJoinName("");
+      navigate(`/room/${room.name}`);
     } catch (e) {
       setError("Room not found");
     }
@@ -88,17 +86,6 @@ export default function RoomLobby() {
 
   
 
-
-  if (activeRoom) {
-    return (
-      <ListeningRoom
-        roomName={activeRoom}
-        onExit={() => setActiveRoom(null)}
-      />
-    );
-  }
-
-  
 
   return (
     <div className="w-full h-screen overflow-y-auto scrollbar-hide">
@@ -192,7 +179,7 @@ export default function RoomLobby() {
                     className="flex items-center justify-between bg-black/30 border border-white/10 rounded-lg px-4 py-3 hover:bg-white/10 transition-colors"
                   >
                     <button
-                      onClick={() => setActiveRoom(room.name)}
+                      onClick={() => navigate(`/room/${room.name}`)}
                       className="text-left flex-1"
                     >
                       <div className="font-semibold">{room.name}</div>

@@ -13,23 +13,30 @@ const CardContent = (props) => <div {...props} />;
 const currentYear = new Date().getFullYear();
 const lastYear = currentYear - 1;
 
+import Loader from "../components/loader";
+import { useScrollGrab } from "../hooks/useScrollGrab";
+
 const Home = () => {
   const [newReleasesItems, setNewReleasesItems] = useState([]);
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { setQueueAndPlay } = usePlayer();
 
   useEffect(() => {
     (async () => {
       try {
+        setIsLoading(true);
         const data = await getHomeData();
         setNewReleasesItems(data.newReleases || []);
         setRecentlyPlayed(data.recentlyPlayed || []);
         setTopArtists(data.topArtists || []);
       } catch (e) {
         console.error("Failed to fetch home data", e);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, []);
@@ -38,25 +45,51 @@ const Home = () => {
     return (
       <div
         onClick={() => onSelect(item)}
-        className="bg-white/5 p-4 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
-        <img
-          src={item.imageUrl}
-          alt={item.title}
-          className="w-full aspect-square object-cover rounded-md mb-4"
-        />
-        <h3 className="font-bold text-white truncate">{item.title}</h3>
-        <p className="text-sm text-zinc-400 truncate">{item.subtitle}</p>
+        className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2"
+      >
+        <div className="relative w-full aspect-square overflow-hidden rounded-md shadow-lg">
+          <img
+            src={item.imageUrl}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
+        <div className="flex flex-col gap-0.5 w-full text-left mt-1">
+          <h3 className="font-semibold text-white text-sm truncate w-full">{item.title}</h3>
+          <p className="text-xs text-zinc-400 truncate w-full">{item.subtitle}</p>
+        </div>
       </div>
     );
   }
 
   function Cards({ items = [], onSelect }) {
+    const { ref, isDragging } = useScrollGrab();
+
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4">
+      <div 
+        ref={ref}
+        className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-4 snap-x cursor-grab active:cursor-grabbing"
+      >
         {items.map((item) => (
-          <AlbumCard key={item.id} item={item} onSelect={onSelect} />
+          <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px] snap-start">
+            <AlbumCard 
+              item={item} 
+              onSelect={(i) => {
+                if (!isDragging) onSelect(i);
+              }} 
+            />
+          </div>
         ))}
       </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <main className="w-full h-[calc(100vh-100px)] flex items-center justify-center p-4 sm:p-6 bg-transparent">
+        <Loader />
+      </main>
     );
   }
 
@@ -123,21 +156,13 @@ const Home = () => {
           New Releases ({currentYear} / {lastYear})
         </h2>
         {newReleasesItems.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-6">
-            {newReleasesItems.map((item) => (
-              <div key={item.id} className="block">
-                <AlbumCard
-                  item={item}
-                  onSelect={(item) => {
-                    const index = newReleasesItems.findIndex(
-                      (i) => i.id === item.id,
-                    );
-                    setQueueAndPlay(newReleasesItems, index);
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+          <Cards 
+            items={newReleasesItems} 
+            onSelect={(item) => {
+              const index = newReleasesItems.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(newReleasesItems, index);
+            }} 
+          />
         ) : (
           <div className="text-center py-10">
             <p className="text-zinc-500">No new releases available.</p>
@@ -147,20 +172,14 @@ const Home = () => {
 
       {topArtists.length > 0 && (
         <div className="mb-2">
-          <h2 className="font-bold text-2xl text-white ml-2.5">Artists</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {topArtists.map((item) => (
-              <div key={item.id} className="block">
-                <AlbumCard
-                  item={item}
-                  onSelect={(item) => {
-                    const index = topArtists.findIndex((i) => i.id === item.id);
-                    setQueueAndPlay(topArtists, index);
-                  }}
-                />
-              </div>
-            ))}
-          </div>
+          <h2 className="font-bold text-2xl text-white ml-2.5 mt-8 mb-4">Artists</h2>
+          <Cards 
+            items={topArtists} 
+            onSelect={(item) => {
+              const index = topArtists.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(topArtists, index);
+            }} 
+          />
         </div>
       )}
     </main>

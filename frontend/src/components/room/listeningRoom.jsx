@@ -9,27 +9,31 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { usePlayer } from "../../context/PlayerContext";
-import PlayerBar from "../PlayerBar";
-import Chat from "../chats/chat";
-import SearchBar from "../SearchBar";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   addMusicToQueueAPI,
   deleteMusicFromQueueAPI,
   getRoomDetailsAPI,
 } from "../../api/room";
+import { usePlayer } from "../../context/PlayerContext";
+import Chat from "../chats/chat";
+import PlayerBar from "../PlayerBar";
+import SearchBar from "../SearchBar";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 const ROOM_WS_BASE = API_BASE.replace(/^http/, "ws");
 
-const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
+const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
+  const { roomName: paramRoomName } = useParams();
+  const navigate = useNavigate();
+  const roomName = propRoomName || paramRoomName || "Global Room";
+  const onExit = propOnExit || (() => navigate("/room"));
+
   const wsRef = useRef(null);
   const containerRef = useRef(null);
-  const listenersRef = useRef(new Set());
   const orderedPlaylistRef = useRef([]);
   const roomHostIdRef = useRef(null);
   const activeTrackIdRef = useRef(null);
-  const baseListenerCountRef = useRef(0);
   const isPlayingRef = useRef(false);
   const lastPausedSeekAtRef = useRef(0);
   const clientIdRef = useRef(
@@ -54,6 +58,8 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     setVolume,
     seekToSeconds,
     getCurrentTimeSeconds,
+    enterRoomMode,
+    exitRoomMode,
   } = usePlayer();
   const user = useSelector((state) => state.user);
   const userId = user?.id || user?._id;
@@ -71,17 +77,17 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
 
   useEffect(() => {
     localStorage.setItem("one_music_room_client_id", clientIdRef.current);
+    enterRoomMode();
+    return () => {
+      exitRoomMode();
+    };
   }, []);
 
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  const updateLiveListeners = () => {
-    setUserActive(
-      Math.max(baseListenerCountRef.current, listenersRef.current.size || 1),
-    );
-  };
+  // Live listener count is now managed by backend WebSocket 'listeners_count' events
 
   const sendRoomEvent = (payload) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
@@ -150,9 +156,6 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     wsRef.current = ws;
 
     ws.onopen = () => {
-      listenersRef.current.add(clientIdRef.current);
-      updateLiveListeners();
-      sendRoomEvent({ type: "presence_join" });
       console.log("WS Connected:", roomName);
     };
 
@@ -167,15 +170,8 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
       if (!payload || payload.roomName !== roomName) return;
       if (payload.senderId === clientIdRef.current) return;
 
-      if (payload.type === "presence_join") {
-        listenersRef.current.add(payload.senderId);
-        updateLiveListeners();
-        return;
-      }
-
-      if (payload.type === "presence_leave") {
-        listenersRef.current.delete(payload.senderId);
-        updateLiveListeners();
+      if (payload.type === "listeners_count" && typeof payload.count === "number") {
+        setUserActive(payload.count);
         return;
       }
 
@@ -248,8 +244,8 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
         const seekWithGuard = (time) => {
           const localTime = Number(getCurrentTimeSeconds() || 0);
           const drift = Math.abs(time - localTime);
-          if (drift > 0.45) {
-            seekToSeconds(time);
+          if (drift > 0.15) {
+            seekToSeconds(time + 0.05); // slightly lookahead
           }
         };
 
@@ -280,10 +276,8 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
           }
         }
 
-        setTimeout(() => {
-          if (shouldPlay && !isPlayingRef.current) play();
-          if (!shouldPlay && isPlayingRef.current) pause();
-        }, 80);
+        if (shouldPlay && !isPlayingRef.current) play();
+        if (!shouldPlay && isPlayingRef.current) pause();
       }
     };
 
@@ -291,9 +285,6 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     ws.onerror = (err) => console.error("Room WS Error:", err);
 
     return () => {
-      sendRoomEvent({ type: "presence_leave" });
-      listenersRef.current.delete(clientIdRef.current);
-      updateLiveListeners();
       console.log("Leaving room -> Closing WebSocket");
       if (
         ws.readyState === WebSocket.CONNECTING ||
@@ -309,9 +300,7 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
       try {
         const room = await getRoomDetailsAPI(roomName);
         setPlaylist(room.queue || []);
-        baseListenerCountRef.current = room.listeners?.length || 1;
         setRoomHostId(room.host || null);
-        updateLiveListeners();
       } catch (err) {
         console.error("Room load failed:", err);
       }
@@ -331,7 +320,7 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     if (!isRoomHost || !activeTrack?.id) return;
     const heartbeatId = setInterval(() => {
       broadcastSyncState();
-    }, 1200);
+    }, 450);
     return () => clearInterval(heartbeatId);
   }, [activeTrack?.id, isRoomHost, roomHostId, userId]);
 
@@ -415,14 +404,13 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
 
   const handlePlayPauseSync = () => {
     if (!canControlTransport) return;
+    const targetPlayState = !isPlayingRef.current;
     togglePlayPause();
-    sendRoomEvent({ type: "play_pause", shouldPlay: !isPlayingRef.current });
+    sendRoomEvent({ type: "play_pause", shouldPlay: targetPlayState });
     if (isRoomHost) {
-      setTimeout(() => {
-        broadcastSyncState({
-          isPlaying: !isPlayingRef.current,
-        });
-      }, 220);
+      broadcastSyncState({
+        isPlaying: targetPlayState,
+      });
     }
   };
 
@@ -431,9 +419,7 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     playNext();
     sendRoomEvent({ type: "next" });
     if (isRoomHost) {
-      setTimeout(() => {
-        broadcastSyncState();
-      }, 180);
+      broadcastSyncState();
     }
   };
 
@@ -442,17 +428,13 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
     playPrev();
     sendRoomEvent({ type: "prev" });
     if (isRoomHost) {
-      setTimeout(() => {
-        broadcastSyncState();
-      }, 180);
+      broadcastSyncState();
     }
   };
 
   const handleSeekSync = () => {
     if (!canControlTransport || !isRoomHost) return;
-    setTimeout(() => {
-      broadcastSyncState();
-    }, 120);
+    broadcastSyncState();
   };
 
   const toggleFullscreen = async () => {
@@ -491,7 +473,6 @@ const ListeningRoom = ({ roomName = "Global Room", onExit }) => {
                   (wsRef.current.readyState === WebSocket.CONNECTING ||
                     wsRef.current.readyState === WebSocket.OPEN)
                 ) {
-                  sendRoomEvent({ type: "presence_leave" });
                   wsRef.current.close();
                 }
                 onExit();
