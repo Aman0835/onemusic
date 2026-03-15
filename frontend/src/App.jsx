@@ -17,6 +17,7 @@ import Login from "./components/user/login.jsx";
 import PlayerBar from "./components/PlayerBar.jsx";
 import RoomLobby from "./components/room/roomLobby.jsx";
 import Signup from "./components/user/signup.jsx";
+import ListeningRoom from "./components/room/listeningRoom.jsx";
 
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
 import "./index.css";
@@ -119,6 +120,7 @@ const AppContent = () => {
         <Route path="/artist" element={<Artist />} />
         <Route path="/album" element={<Album />} />
         <Route path="/room" element={<RoomLobby />} />
+        <Route path="/room/:roomName" element={<ListeningRoom />} />
         <Route path="/Home" element={<Navigate to="/home" replace />} />
       </Routes>
 

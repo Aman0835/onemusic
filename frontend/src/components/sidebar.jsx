@@ -8,6 +8,7 @@ import ProfileCard from "./cards/profileCard";
 export default function Sidebar({ children }) {
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
+   
 
   return (
     <aside className="h-screen w-16 md:w-60">

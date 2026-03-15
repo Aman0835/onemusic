@@ -23,9 +23,6 @@ export default function RoomLobby() {
   const [error, setError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // -------------------------
-  // FETCH ROOMS ON LOAD
-  // -------------------------
   useEffect(() => {
     const userId = user?.id || user?._id;
     if (!userId) {
@@ -47,9 +44,8 @@ export default function RoomLobby() {
     })();
   }, [user]);
 
-  // -------------------------
-  // CREATE ROOM
-  // -------------------------
+ 
+
   const createRoom = async () => {
     if (!user) {
       setShowLoginModal(true);
@@ -68,9 +64,6 @@ export default function RoomLobby() {
     }
   };
 
-  // -------------------------
-  // JOIN ROOM
-  // -------------------------
   const joinRoom = async () => {
     if (!joinName.trim()) return;
 
@@ -83,9 +76,6 @@ export default function RoomLobby() {
     }
   };
 
-  // -------------------------
-  // DELETE ROOM
-  // -------------------------
   const handleDeleteRoom = async (name) => {
     try {
       await deleteRoomAPI(name);
@@ -95,9 +85,10 @@ export default function RoomLobby() {
     }
   };
 
-  // -------------------------
-  // OPEN LISTENING ROOM
-  // -------------------------
+
+  
+
+
   if (activeRoom) {
     return (
       <ListeningRoom
@@ -107,11 +98,12 @@ export default function RoomLobby() {
     );
   }
 
+  
+
   return (
     <div className="w-full h-screen overflow-y-auto scrollbar-hide">
       <div className="max-w-5xl mx-auto px-6 py-10">
 
-        {/* HEADER */}
         <header className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Rooms
@@ -121,10 +113,8 @@ export default function RoomLobby() {
           </p>
         </header>
 
-        {/* CREATE + JOIN SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-          {/* CREATE ROOM */}
           <section className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h2 className="text-lg font-semibold mb-1">Create Room</h2>
             <p className="text-sm text-zinc-400 mb-4">
@@ -152,7 +142,6 @@ export default function RoomLobby() {
             </button>
           </section>
 
-          {/* JOIN ROOM */}
           <section className="bg-white/5 border border-white/10 rounded-xl p-6">
             <h2 className="text-lg font-semibold mb-1">Join Room</h2>
             <p className="text-sm text-zinc-400 mb-4">
@@ -184,7 +173,6 @@ export default function RoomLobby() {
 
         </div>
 
-        {/* USER ROOMS */}
         <section className="mt-8">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm uppercase tracking-widest text-zinc-400">

@@ -288,6 +288,17 @@ export const PlayerProvider = ({ children }) => {
     playerRef.current.seekTo(duration * percent, true);
   };
 
+  const seekToSeconds = (seconds) => {
+    if (!playerRef.current) return;
+    const safeSeconds = Math.max(0, Number(seconds) || 0);
+    playerRef.current.seekTo(safeSeconds, true);
+  };
+
+  const getCurrentTimeSeconds = () => {
+    if (!playerRef.current) return 0;
+    return Number(playerRef.current.getCurrentTime?.() || 0);
+  };
+
   return (
     <PlayerContext.Provider
       value={{
@@ -307,6 +318,8 @@ export const PlayerProvider = ({ children }) => {
         setVolume,
         setActiveTrack,
         setQueueAndPlay,
+        seekToSeconds,
+        getCurrentTimeSeconds,
         shuffle,
         setShuffle,
         repeatMode,

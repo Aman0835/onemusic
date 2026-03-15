@@ -17,6 +17,7 @@ export default function SearchBar({
   const ref = useRef(null);
   const shouldShowPlusIcon = showActionButton ?? showPlusIcon;
 
+  
   useEffect(() => {
     function handleClick(e) {
       if (ref.current && !ref.current.contains(e.target)) {
