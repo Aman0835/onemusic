@@ -42,6 +42,10 @@ const userSchema = new mongoose.Schema(
           throw new Error("invalid gender");
         }
       },
+    },
+    photoUrl: {
+      type: String,
+      default: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
     }
   },
   {
@@ -69,5 +73,3 @@ userSchema.methods.validatePassword = async function (passwordByUser) {
 const User = mongoose.model("user", userSchema);
 
 module.exports = User;
-
-

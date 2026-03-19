@@ -23,3 +23,6 @@ export const addMusicToQueueAPI = async (name, song) =>
 
 export const deleteMusicFromQueueAPI = async (name, songId) =>
   (await axios.delete(`${API}/${name}/queue/${songId}`, { withCredentials: true })).data;
+
+export const castVoteAPI = async (name, trackId, value) =>
+  (await axios.post(`${API}/${name}/vote`, { trackId, value }, { withCredentials: true })).data;

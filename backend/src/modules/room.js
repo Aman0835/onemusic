@@ -21,6 +21,10 @@ const roomSchema = new mongoose.Schema({
     type: Object,
     default: null,
   },
+  votes: {
+    type: Object,
+    default: {}, // trackId -> { userId -> value }
+  },
 });
 
 const Room = mongoose.model("Room", roomSchema);

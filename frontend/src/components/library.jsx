@@ -132,7 +132,7 @@ export default function LibraryPage() {
     );
 
   return (
-    <div className="text-white h-screen overflow-hidden p-4 sm:p-6 font-sans flex flex-col">
+    <div className="text-white h-full overflow-hidden p-4 sm:p-6 font-sans flex flex-col pb-8">
       <Header onToggleSearch={() => setShowSearch((v) => !v)} />
 
       <div className="mt-6">
@@ -168,10 +168,10 @@ export default function LibraryPage() {
           {viewMode === "grid" ? (
             <div 
               ref={gridScrollRef}
-              className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-6 snap-x cursor-grab active:cursor-grabbing"
+              className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-6 cursor-grab active:cursor-grabbing touch-pan-x"
             >
               {filteredItems.map((item) => (
-                <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px] snap-start">
+                <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px]">
                   <LibraryItemCard
                     item={item}
                     onClick={() => {

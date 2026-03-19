@@ -23,13 +23,14 @@ function serializeUser(user) {
     lastName: user.lastName,
     email: user.email,
     gender: user.gender,
+    photoUrl: user.photoUrl,
   };
 }
 
 async function signupHandler(req, res) {
   try {
     validateSingupData(req);
-    const { password, firstName, lastName, email, gender } = req.body;
+    const { password, firstName, lastName, email, gender, photoUrl } = req.body;
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = new User({
@@ -38,6 +39,7 @@ async function signupHandler(req, res) {
       email,
       password: passwordHash,
       gender,
+      photoUrl,
     });
 
     const findIdByemail = await User.findOne({ email: user.email });

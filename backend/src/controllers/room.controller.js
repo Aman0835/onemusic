@@ -127,12 +127,41 @@ const getRoomDetails = async (req, res) => {
   const { name } = req.params;
 
   try {
-    const room = await Room.findOne({ name });
+    const room = await Room.findOne({ name })
+      .populate("host", "firstName lastName _id photoUrl")
+      .populate("listeners", "firstName lastName _id photoUrl");
     if (!room) return res.status(404).json({ error: "Room not found" });
 
     res.json(room);
   } catch (err) {
     res.status(500).json({ error: "Server error" });
+  }
+};
+
+const castVote = async (req, res) => {
+  const { name } = req.params;
+  const { trackId, value } = req.body;
+  const userId = req.user._id.toString();
+
+  try {
+    const room = await Room.findOne({ name });
+    if (!room) return res.status(404).json({ error: "Room not found" });
+
+    // Deep copy votes object to ensure change detection
+    const votes = JSON.parse(JSON.stringify(room.votes || {}));
+    if (!votes[trackId]) votes[trackId] = {};
+    
+    votes[trackId][userId] = Number(value);
+    
+    room.votes = votes;
+    room.markModified("votes");
+    await room.save();
+    
+    console.log(`Vote saved for room ${name}, track ${trackId}`);
+    return res.json(room);
+  } catch (err) {
+    console.error("Vote cast error:", err);
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
@@ -144,4 +173,5 @@ module.exports = {
   addMusicToQueue,
   getRoomDetails,
   deleteMusicFromQueue,
+  castVote,
 };

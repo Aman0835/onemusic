@@ -23,9 +23,24 @@ const PlayerBar = ({
   repeatMode,
   setRepeatMode,
   isRoomMode,
+  isHost,
 }) => {
   const [volume, setVolumeLocal] = useState(66);
   const [oldVolume, setOldVolume] = useState(66);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const checkPermission = (action) => {
+    if (isRoomMode && !isHost) {
+      showToast("Only the host can control the room playback.");
+      return false;
+    }
+    return true;
+  };
 
   const toggleMute = () => {
     if (volume > 0) {
@@ -39,8 +54,8 @@ const PlayerBar = ({
   };
 
   return (
-    <footer className="fixed bottom-0 left-16 md:left-60 right-0 h-22 bg-black/30 backdrop-blur-md border-t border-white/10">
-      <div className="h-full grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-2 sm:px-4 md:px-6">
+    <footer className="w-full h-24 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-2">
+      <div className="h-full grid grid-cols-[1fr_auto_1fr] items-center gap-4">
       <div className="min-w-0 flex items-center gap-2 md:gap-3">
         {activeTrack && (
           <>

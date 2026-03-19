@@ -24,14 +24,14 @@ export default function AlbumPage() {
 
   if (isLoading) {
     return (
-      <main className="w-full h-screen flex items-center justify-center">
+      <main className="w-full h-full flex items-center justify-center">
         <Loader />
       </main>
     );
   }
 
   if (!album) {
-    return <div className="h-screen w-full p-6 text-white">No album data.</div>;
+    return <div className="h-full w-full p-6 text-white">No album data.</div>;
   }
 
   const tracks = Array.isArray(album.tracks) ? album.tracks : [];
@@ -43,7 +43,7 @@ export default function AlbumPage() {
         className="fixed inset-0 -z-10"
       />
 
-      <div className="h-screen overflow-y-auto scrollbar-hide text-white font-sans">
+      <div className="h-full overflow-y-auto scrollbar-hide text-white font-sans pb-12">
         <div className="p-4 sm:p-6 lg:p-8">
           <header className="flex flex-col sm:flex-row items-center gap-6 pt-12">
             <img
@@ -123,7 +123,6 @@ export default function AlbumPage() {
             <p>{album.releaseDate}</p>
             <p>(c) {album.label}</p>
           </footer>
-          <div className="h-24"></div>
         </div>
       </div>
     </>

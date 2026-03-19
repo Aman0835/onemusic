@@ -82,53 +82,59 @@ const AppContent = () => {
   }, [authApiBase, dispatch, isAuthPage]);
 
   return (
-    <div
-      className="relative flex overflow-hidden h-screen w-full bg-black text-white font-sans 
-      bg-gradient-to-br from-indigo-900/60 via-black to-black
-      animate-gradient-xy pb-24">
+    <div className="flex flex-col h-screen w-full bg-black text-white font-sans overflow-hidden bg-gradient-to-br from-indigo-900/60 via-black to-black animate-gradient-xy">
+      
+      {/* Top Section: Sidebar + Content */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {!hideSidebar && (
+          <Sidebar>
+            <SidebarItem icon={<HouseIcon size={20} />} text="Home" to="/home" />
+            <SidebarItem
+              icon={<LibraryIcon size={20} />}
+              text="Library"
+              to="/library"
+            />
+            <SidebarItem icon={<MicVocal size={20} />} text="Artist" to="/artist" />
+            <SidebarItem icon={<AlbumIcon size={20} />} text="Album" to="/album" />
+            <SidebarItem icon={<Plus size={20} />} text="Room" to="/room" />
+          </Sidebar>
+        )}
 
+        {/* Main Content Area */}
+        <main className="flex-1 h-full min-w-0">
+          <Routes>
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/callback" element={<AuthCallback />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/artist" element={<Artist />} />
+            <Route path="/album" element={<Album />} />
+            <Route path="/room" element={<RoomLobby />} />
+            <Route path="/room/:roomName" element={<ListeningRoom />} />
+            <Route path="/Home" element={<Navigate to="/home" replace />} />
+          </Routes>
+        </main>
+      </div>
+
+      {/* Bottom Section: PlayerBar */}
       {!hideSidebar && (
-        <Sidebar>
-          <SidebarItem icon={<HouseIcon size={20} />} text="Home" to="/home" />
-          <SidebarItem
-            icon={<LibraryIcon size={20} />}
-            text="Library"
-            to="/library"
+        <div className="flex-shrink-0 z-40">
+           <PlayerBar
+            activeTrack={activeTrack}
+            onNext={playNext}
+            onPrev={playPrev}
+            onPlayPause={togglePlayPause}
+            isPlaying={isPlaying}
+            onVolumeChange={setVolume}
+            shuffle={shuffle}
+            setShuffle={setShuffle}
+            repeatMode={repeatMode}
+            setRepeatMode={setRepeatMode}
+            isRoomMode={isRoomMode}
           />
-          <SidebarItem icon={<MicVocal size={20} />} text="Artist" to="/artist" />
-          <SidebarItem icon={<AlbumIcon size={20} />} text="Album" to="/album" />
-          <SidebarItem icon={<Plus size={20} />} text="Room" to="/room" />
-        </Sidebar>
-      )}
-
-      <Routes>
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/callback" element={<AuthCallback />} />
-        <Route path="/" element={<Navigate to="/home" replace />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/artist" element={<Artist />} />
-        <Route path="/album" element={<Album />} />
-        <Route path="/room" element={<RoomLobby />} />
-        <Route path="/room/:roomName" element={<ListeningRoom />} />
-        <Route path="/Home" element={<Navigate to="/home" replace />} />
-      </Routes>
-
-      {!hideSidebar && (
-        <PlayerBar
-          activeTrack={activeTrack}
-          onNext={playNext}
-          onPrev={playPrev}
-          onPlayPause={togglePlayPause}
-          isPlaying={isPlaying}
-          onVolumeChange={setVolume}
-          shuffle={shuffle}
-          setShuffle={setShuffle}
-          repeatMode={repeatMode}
-          setRepeatMode={setRepeatMode}
-          isRoomMode={isRoomMode}
-        />
+        </div>
       )}
     </div>
   );

@@ -26,9 +26,12 @@ export function useScrollGrab() {
 
     const onMove = (e) => {
       if (!isDown) return;
-      e.preventDefault();
+      // Removed e.preventDefault() to allow native horizontal scroll on touch devices
       const walk = (e.pageX - el.offsetLeft - startX) * 0.5;
-      if (Math.abs(walk) > 5) setIsDragging(true);
+      if (Math.abs(walk) > 5) {
+        setIsDragging(true);
+        e.preventDefault(); // Only prevent default if we are actively dragging with mouse
+      }
       el.scrollLeft = scrollLeft - walk;
     };
 

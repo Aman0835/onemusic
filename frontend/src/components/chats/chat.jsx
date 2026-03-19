@@ -88,7 +88,7 @@ const Chat = ({ roomName }) => {
 
 
  return (
-  <aside className="w-80 bg-[#0b0b0b] border-l border-gray-800 flex flex-col ">
+  <aside className="w-full h-full bg-[#0b0b0b] border-l border-white/5 flex flex-col ">
 
     {/* Header */}
     <div className="px-4 py-3 border-b border-gray-800 flex justify-between items-center">
@@ -105,10 +105,10 @@ const Chat = ({ roomName }) => {
         messages.map((msg, i) => (
           <div
             key={i}
-            className={`max-w-[75%] px-3 py-1.5 text-sm rounded-lg text-white ${
+            className={`max-w-[85%] px-3 py-1.5 text-sm rounded-2xl text-white break-words whitespace-pre-wrap ${
               msg.senderName === (user?.firstName || "Guest")
-                ? "self-end bg-blue-600"
-                : "self-start bg-zinc-700"
+                ? "self-end bg-blue-600 rounded-tr-sm"
+                : "self-start bg-zinc-800 rounded-tl-sm"
             }`}
           >
             <span className="font-bold mr-1">{msg.senderName}:</span>

@@ -26,7 +26,7 @@ export default function ArtistPage() {
 
   if (isLoading) {
     return (
-      <main className="w-full h-screen flex items-center justify-center">
+      <main className="w-full h-full flex items-center justify-center">
         <Loader />
       </main>
     );
@@ -42,7 +42,7 @@ export default function ArtistPage() {
   }
 
   return (
-    <div className="h-screen w-full overflow-y-auto scrollbar-hide">
+    <div className="h-full w-full overflow-y-auto scrollbar-hide pb-12">
       {/* HERO */}
       <div className="relative h-[40vh] sm:h-[50vh] text-white">
         <div
@@ -100,7 +100,6 @@ export default function ArtistPage() {
         </div>
       </div>
 
-      <div className="h-24"></div>
     </div>
   );
 }

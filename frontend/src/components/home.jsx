@@ -69,10 +69,10 @@ const Home = () => {
     return (
       <div 
         ref={ref}
-        className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-4 snap-x cursor-grab active:cursor-grabbing"
+        className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-4 cursor-grab active:cursor-grabbing touch-pan-x"
       >
         {items.map((item) => (
-          <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px] snap-start">
+          <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px]">
             <AlbumCard 
               item={item} 
               onSelect={(i) => {
@@ -94,7 +94,7 @@ const Home = () => {
   }
 
   return (
-    <main className="w-full h-screen overflow-y-auto scrollbar-hide p-4 sm:p-6">
+    <main className="w-full h-full overflow-y-auto scrollbar-hide p-4 sm:p-6 pb-8">
       <SearchBar
         showPlusIcon={false}
         onResultsChange={setSearchResults}

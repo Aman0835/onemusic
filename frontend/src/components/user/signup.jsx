@@ -11,7 +11,17 @@ export default function Signup() {
     email: "",
     gender: "",
     password: "",
+    photoUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
   });
+
+  const avatars = [
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka",
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=Sasha",
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=Jameson",
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=Toby",
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=Milo",
+  ];
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -89,6 +99,23 @@ export default function Signup() {
           <option value="male">Male</option>
           <option value="female">Female</option>
         </select>
+
+        <div className="mt-6">
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">Choose Avatar</p>
+          <div className="grid grid-cols-6 gap-2">
+            {avatars.map((url) => (
+              <img
+                key={url}
+                src={url}
+                alt="Avatar"
+                className={`w-10 h-10 rounded-full cursor-pointer border-2 transition-all ${
+                  form.photoUrl === url ? "border-green-500 scale-110 shadow-[0_0_10px_rgba(34,197,94,0.3)]" : "border-transparent hover:border-white/20"
+                }`}
+                onClick={() => setForm({ ...form, photoUrl: url })}
+              />
+            ))}
+          </div>
+        </div>
 
         <button
           disabled={loading}

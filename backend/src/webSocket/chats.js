@@ -11,24 +11,41 @@ function startWebSocketServer(server) {
   roomWSS.on("connection", (socket, req) => {
     console.log("Connected to Room:", req.url);
 
-    const urlParts = req.url.split("/");
-    const roomName = decodeURIComponent(urlParts[urlParts.length - 1].split("?")[0]);
+    const url = new URL(req.url, "http://localhost");
+    const urlParts = url.pathname.split("/");
+    const roomName = decodeURIComponent(urlParts[urlParts.length - 1]);
+    const userId = url.searchParams.get("userId");
 
     if (!roomClients.has(roomName)) {
       roomClients.set(roomName, new Set());
     }
     const clientsSet = roomClients.get(roomName);
+    
+    // Store userId on the socket for tracking
+    if (userId) socket.userId = userId;
     clientsSet.add(socket);
 
-    const broadcastListenerCount = () => {
-      const count = clientsSet.size;
-      const msg = JSON.stringify({ type: "listeners_count", roomName, count });
+    const broadcastActiveUsers = () => {
+      const activeUserIds = Array.from(clientsSet)
+        .map(c => c.userId)
+        .filter(Boolean);
+      
+      // Get unique IDs
+      const uniqueActiveIds = [...new Set(activeUserIds)];
+      
+      const msg = JSON.stringify({ 
+        type: "active_users", 
+        roomName, 
+        count: clientsSet.size,
+        activeUserIds: uniqueActiveIds 
+      });
+      
       clientsSet.forEach((c) => {
         if (c.readyState === 1) c.send(msg);
       });
     };
 
-    broadcastListenerCount();
+    broadcastActiveUsers();
 
     socket.on("message", (msg) => {
       clientsSet.forEach((c) => {
@@ -41,7 +58,7 @@ function startWebSocketServer(server) {
       if (clientsSet.size === 0) {
         roomClients.delete(roomName);
       } else {
-        broadcastListenerCount();
+        broadcastActiveUsers();
       }
     });
   });
