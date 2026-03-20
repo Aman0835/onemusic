@@ -47,6 +47,10 @@ const envOrigins = (process.env.CLIENT_ORIGIN || "")
   app.use(express.json());
 app.use(cookieParser());
 
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
 app.get("/", (req, res) => {
   res.send("One Music Backend is Running ");
 });
@@ -78,7 +82,7 @@ app.get("/search", async (req, res) => {
 })();
 
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, "0.0.0.0", () => {
+const server = app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
 
