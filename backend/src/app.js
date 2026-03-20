@@ -73,21 +73,21 @@ app.get("/search", async (req, res) => {
   console.log("YT Music Ready");
 })();
 
+const PORT = process.env.PORT || 5000;
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port", PORT);
+});
+
+try {
+  startWebSocketServer(server);
+} catch (err) {
+  console.error("Failed to start WebSocket server:", err);
+}
+
 console.log("Starting Database Connection...");
 connectDB()
   .then(() => {
     console.log("Database Connection Success");
-    const PORT = process.env.PORT || 5000;
-
-    const server = app.listen(PORT, "0.0.0.0", () => {
-      console.log("Server running on port", PORT);
-    });
-    try {
-      startWebSocketServer(server);   
-    } catch (err) {
-      console.error("Failed to start WebSocket server:", err);
-    }
-
   })
   .catch((err) => {
     console.error("Failed to connect to the database:", err);
