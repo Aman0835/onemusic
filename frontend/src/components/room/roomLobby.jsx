@@ -58,6 +58,8 @@ export default function RoomLobby() {
       setRoomName("");
       navigate(`/room/${newRoom.name}`);
     } catch (e) {
+      const errorMsg = e?.response?.data?.error || e?.response?.data?.message || e.message || "Failed to create room";
+      setError(errorMsg);
       console.error(e);
     } finally {
       setIsCreating(false);
@@ -257,7 +259,7 @@ export default function RoomLobby() {
                   <div className={viewMode === 'grid' ? 'flex items-center justify-between mt-6' : 'flex items-center gap-6'}>
                     <div className="flex items-center gap-1.5 text-zinc-400 text-xs">
                       <Users size={14} />
-                      <span>{room.listeners?.length || 0} active</span>
+                      <span>{room.activeMembers?.length || 0} active</span>
                     </div>
 
                     <button

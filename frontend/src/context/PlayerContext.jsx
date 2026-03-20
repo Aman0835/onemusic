@@ -418,7 +418,6 @@ export const PlayerProvider = ({ children }) => {
         exitRoomMode,
       }}>
       <div
-        id="yt-player"
         style={{
           position: "fixed",
           top: "-9999px",
@@ -428,6 +427,7 @@ export const PlayerProvider = ({ children }) => {
           opacity: 0.01,
           pointerEvents: "none",
         }}
+        dangerouslySetInnerHTML={{ __html: '<div id="yt-player"></div>' }}
       />
       {children}
     </PlayerContext.Provider>

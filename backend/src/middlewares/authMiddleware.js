@@ -6,7 +6,10 @@ const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 const authMiddleware = async (req, res, next) => {
   try {
     const token = req.cookies?.token;
-    if (!token) return res.status(401).json({ error: "Not logged in" });
+    if (!token) {
+      console.log("Auth Error: Missing token cookie. Origin:", req.get('origin'));
+      return res.status(401).json({ error: "Not logged in" });
+    }
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded?._id || decoded?.id;

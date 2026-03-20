@@ -52,7 +52,9 @@ export default function Login() {
       dispatch(addUser(user));
       navigate("/home");
     } catch (error) {
-      setError(error?.response?.data || error?.message || "Something went wrong");
+      const errorData = error?.response?.data;
+      const errorMsg = (typeof errorData === "string" ? errorData : errorData?.error || errorData?.message) || error?.message || "Something went wrong";
+      setError(errorMsg);
       console.error(error);
     } finally {
       setLoading(false);
