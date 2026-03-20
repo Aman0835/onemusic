@@ -8,12 +8,25 @@ const { validateSingupData } = require("../helpers/validation");
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
 function getCookieOptions() {
-  return {
+  const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_STATIC_URL;
+  
+  const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    path: "/",            
+    path: "/",
+    expires: new Date(Date.now() + 8 * 3600000),
   };
+
+  if (isProduction) {
+    options.secure = true;
+    options.sameSite = "None";
+    // Avoid hardcoding domain if possible, or use a more generic one if needed
+    // options.domain = ".up.railway.app"; 
+  } else {
+    options.secure = false;
+    options.sameSite = "Lax";
+  }
+
+  return options;
 }
 function serializeUser(user) {
   return {

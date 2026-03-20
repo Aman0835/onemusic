@@ -8,6 +8,7 @@ const authMiddleware = async (req, res, next) => {
     const token = req.cookies?.token;
     if (!token) {
       console.log("Auth Error: Missing token cookie. Origin:", req.get('origin'));
+      console.log("Cookie Header:", req.headers.cookie);
       return res.status(401).json({ error: "Not logged in" });
     }
 
