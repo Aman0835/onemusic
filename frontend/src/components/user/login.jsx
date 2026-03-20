@@ -1,16 +1,14 @@
 import axios from "axios";
-import { 
-  Eye, 
-  EyeOff, 
-  Mail, 
-  Lock, 
-  Music, 
-  ChevronRight,
-  LogIn
+import {
+    ChevronRight,
+    Eye,
+    EyeOff,
+    Lock,
+    Mail
 } from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { addUser } from "../utils/UserSlice";
 
 const AUTH_API_BASE =
@@ -52,9 +50,7 @@ export default function Login() {
       dispatch(addUser(user));
       navigate("/home");
     } catch (error) {
-      const errorData = error?.response?.data;
-      const errorMsg = (typeof errorData === "string" ? errorData : errorData?.error || errorData?.message) || error?.message || "Something went wrong";
-      setError(errorMsg);
+      setError(error?.response?.data || error?.message || "Something went wrong");
       console.error(error);
     } finally {
       setLoading(false);

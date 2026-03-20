@@ -1,9 +1,9 @@
 import {
-  Navigate,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-  useLocation,
+    Navigate,
+    Route,
+    BrowserRouter as Router,
+    Routes,
+    useLocation,
 } from "react-router-dom";
 
 
@@ -13,24 +13,24 @@ import Album from "./components/album.jsx";
 import Artist from "./components/artist.jsx";
 import Home from "./components/home.jsx";
 import Library from "./components/library.jsx";
-import Login from "./components/user/login.jsx";
 import PlayerBar from "./components/PlayerBar.jsx";
-import RoomLobby from "./components/room/roomLobby.jsx";
-import Signup from "./components/user/signup.jsx";
 import ListeningRoom from "./components/room/listeningRoom.jsx";
+import RoomLobby from "./components/room/roomLobby.jsx";
+import Login from "./components/user/login.jsx";
+import Signup from "./components/user/signup.jsx";
 
+import AuthCallback from "./auth/AuthCallback.jsx";
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
 import "./index.css";
-import AuthCallback from "./auth/AuthCallback.jsx";
 
-import {
-  Album as AlbumIcon,
-  House as HouseIcon,
-  Library as LibraryIcon,
-  MicVocal,
-  Plus,
-} from "lucide-react";
 import axios from "axios";
+import {
+    Album as AlbumIcon,
+    House as HouseIcon,
+    Library as LibraryIcon,
+    MicVocal,
+    Plus,
+} from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addUser, removeUser } from "./components/utils/UserSlice";

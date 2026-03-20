@@ -12,7 +12,8 @@ const RoomSidebar = ({
   setShowMobileSettings,
   isFullscreen,
   toggleFullscreen,
-  handleExit
+  handleExit,
+  onShare,
 }) => {
   return (
     <aside className={`
@@ -114,6 +115,12 @@ const RoomSidebar = ({
               title={isFullscreen ? "Exit fullscreen" : "Fullscreen player"}>
               {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
               {isFullscreen ? "Window Mode" : "Fullscreen Mode"}
+            </button>
+
+            <button
+              onClick={onShare}
+              className="w-full py-3 bg-[#04A72E]/10 border border-[#04A72E]/10 text-[#04A72E] rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#04A72E] hover:text-black transition-all">
+              SHARE ROOM
             </button>
             
             <button

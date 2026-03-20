@@ -1,18 +1,16 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addUser } from "../utils/UserSlice";
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  UserCircle, 
-  Mars, 
-  Venus, 
-  MoreHorizontal,
-  Music,
-  ChevronRight
+import {
+    ChevronRight,
+    Lock,
+    Mail,
+    Mars,
+    MoreHorizontal,
+    User,
+    Venus
 } from "lucide-react";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { addUser } from "../utils/UserSlice";
 
 const AUTH_API_BASE =
   import.meta.env.VITE_API_BASE_URL ||
@@ -62,10 +60,7 @@ export default function Signup() {
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        const errorMsg = (typeof data === "string" ? data : data.message || data.error) || "Signup failed";
-        throw new Error(errorMsg);
-      }
+      if (!res.ok) throw new Error(data.message || data.error || "Signup failed");
       
       const user = data.user || data;
       

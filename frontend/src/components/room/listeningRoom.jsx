@@ -29,6 +29,7 @@ import SearchBar from "../SearchBar";
 import RoomSidebar from "./modules/RoomSidebar";
 import RoomTrackItem from "./modules/RoomTrackItem";
 import { useRoomSocket } from "./modules/useRoomSocket";
+import ShareRoomModal from "./modules/ShareRoomModal";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
 const ROOM_WS_BASE = API_BASE.replace(/^http/, "ws");
@@ -83,6 +84,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
   const [roomListeners, setRoomListeners] = useState([]);
   const [showMobileSettings, setShowMobileSettings] = useState(false);
   const [showMobileChat, setShowMobileChat] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [toast, setToast] = useState(null);
 
   const showToast = (msg) => {
@@ -422,6 +424,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
         isFullscreen={isFullscreen}
         toggleFullscreen={toggleFullscreen}
         handleExit={handleExit}
+        onShare={() => setShowShareModal(true)}
       />
 
       {/* Main Content Area */}
@@ -556,6 +559,13 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
           </div>
       </div>
 
+      {/* Share Room Modal */}
+      {showShareModal && (
+        <ShareRoomModal 
+          roomName={roomName} 
+          onClose={() => setShowShareModal(false)} 
+        />
+      )}
     </div>
   );
 };
