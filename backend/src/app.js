@@ -32,12 +32,19 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
+      
+      // Allow exact matches from allowedOrigins
       if (allowedOrigins.has(origin)) {
-        callback(null, true);
-      } else {
-        console.log("CORS Rejected for origin:", origin);
-        callback(null, false); // Don't throw, just block origin
+        return callback(null, true);
       }
+
+      // Allow any Vercel preview URL (ends with .vercel.app)
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      console.log("CORS Rejected for origin:", origin);
+      callback(null, false);
     },
     credentials: true,
   })
