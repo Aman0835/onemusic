@@ -132,7 +132,7 @@ export default function RoomLobby() {
                   onKeyDown={(e) => e.key === "Enter" && createRoom()}
                 />
               </div>
-
+              {error && <p className="text-red-500 text-xs mt-1 px-1">{error}</p>}
               <button
                 onClick={createRoom}
                 disabled={!roomName.trim() || isCreating}
