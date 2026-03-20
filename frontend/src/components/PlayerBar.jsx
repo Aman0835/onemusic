@@ -54,7 +54,7 @@ const PlayerBar = ({
   };
 
   return (
-    <footer className="w-full h-24 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-2">
+    <footer className="w-full h-24 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-2 relative">
       <div className="h-full grid grid-cols-[1fr_auto_1fr] items-center gap-4">
       <div className="min-w-0 flex items-center gap-2 md:gap-3">
         {activeTrack && (
@@ -88,7 +88,9 @@ const PlayerBar = ({
         <div className="flex items-center gap-3 md:gap-6">
           <Shuffle
             size={16}
-            onClick={() => setShuffle(!shuffle)}
+            onClick={() => {
+              if (checkPermission("shuffle")) setShuffle(!shuffle);
+            }}
             className={`cursor-pointer ${
               shuffle ? "text-green-500" : "text-zinc-500"
             }`}
@@ -96,24 +98,31 @@ const PlayerBar = ({
 
           <SkipBack
             size={18}
-            onClick={onPrev}
+            onClick={() => {
+              if (checkPermission("prev")) onPrev();
+            }}
             className="cursor-pointer hover:text-white"
           />
 
           <button
-            onClick={onPlayPause}
+            onClick={() => {
+              if (checkPermission("play_pause")) onPlayPause();
+            }}
             className="bg-white text-black rounded-full p-2 md:p-2.5 hover:scale-110">
             {isPlaying ? <Pause /> : <Play />}
           </button>
 
           <SkipForward
             size={18}
-            onClick={onNext}
+            onClick={() => {
+              if (checkPermission("next")) onNext();
+            }}
             className="cursor-pointer hover:text-white"
           />
 
           <button
             onClick={() => {
+              if (!checkPermission("repeat")) return;
               if (repeatMode === "off") setRepeatMode("one");
               else if (repeatMode === "one") setRepeatMode("all");
               else setRepeatMode("off");
@@ -196,6 +205,13 @@ const PlayerBar = ({
         />
       </div>
       </div>
+      {toast && (
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="bg-[#04A72E] text-black px-4 py-2 rounded-full font-bold text-xs shadow-2xl border border-white/20 whitespace-nowrap">
+            {toast}
+          </div>
+        </div>
+      )}
     </footer>
   );
 };

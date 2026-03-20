@@ -101,7 +101,7 @@ const AppContent = () => {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 h-full min-w-0">
+        <main className="flex-1 h-full min-w-0 overflow-y-auto scrollbar-hide">
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />

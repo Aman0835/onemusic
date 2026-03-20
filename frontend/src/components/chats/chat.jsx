@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const CHAT_WS_BASE = API_BASE.replace(/^http/, "ws");
+
 const Chat = ({ roomName }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -11,7 +14,7 @@ const Chat = ({ roomName }) => {
 
   // ------------------ CONNECT WS ------------------
   const connectWS = () => {
-    const ws = new WebSocket("ws://localhost:5000/ws/chat");
+    const ws = new WebSocket(`${CHAT_WS_BASE}/ws/chat`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -60,7 +63,7 @@ const Chat = ({ roomName }) => {
 
     // Save to DB
     try {
-      await fetch("http://localhost:5000/api/chat/add", {
+      await fetch(`${API_BASE}/api/chat/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(messagePayload),
@@ -76,7 +79,7 @@ const Chat = ({ roomName }) => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/chat/${roomName}`);
+        const res = await fetch(`${API_BASE}/api/chat/${roomName}`);
         const data = await res.json();
         setMessages(data);
       } catch (err) {

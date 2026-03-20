@@ -8,10 +8,11 @@ const { validateSingupData } = require("../helpers/validation");
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
 function getCookieOptions() {
+  const isProduction = process.env.NODE_ENV === "production" || process.env.CLIENT_ORIGIN?.includes("https");
   return {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
     expires: new Date(Date.now() + 8 * 3600000),
   };
 }
@@ -56,7 +57,7 @@ async function signupHandler(req, res) {
       user: serializeUser(user),
     });
   } catch (err) {
-    res.status(400).send("some thing went wrong " + err.message);
+    res.status(400).json({ error: "Something went wrong: " + err.message });
   }
 }
 
@@ -84,7 +85,7 @@ authRouter.post("/login", async (req, res) => {
       throw new Error(" Invalid credentials");
     }
   } catch (err) {
-    res.status(400).send("some thing went wrong " + err.message);
+    res.status(400).json({ error: "Something went wrong: " + err.message });
   }
 });
 
@@ -107,13 +108,14 @@ authRouter.get("/me", async (req, res) => {
 });
 
 authRouter.post("/logout", async (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production" || process.env.CLIENT_ORIGIN?.includes("https");
   res.cookie("token", null, {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    sameSite: isProduction ? "none" : "lax",
+    secure: isProduction,
     expires: new Date(Date.now()),
   });
-  res.send("logout successful");
+  res.json({ message: "Logout successful" });
 });
 
 module.exports = { authRouter };

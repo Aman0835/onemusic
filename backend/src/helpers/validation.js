@@ -7,9 +7,7 @@ function validateSingupData(req) {
     email,
     password,
     gender,
-    age,
-    profilePic,
-    about,
+    photoUrl,
   } = req.body;
 
   if (!firstName || !lastName) {
@@ -18,9 +16,7 @@ function validateSingupData(req) {
     throw new Error("invalid email format");
   } else if (!validator.isStrongPassword(password)) {
     throw new Error("password is not strong enough");
-  } else if (age < 18 || age > 100) {
-    throw new Error("18 <= age <= 100");
-  } else if (gender !== "male" && gender !== "female" && gender !== "other") {
+  } else if (gender && !["male", "female", "other"].includes(gender.toLowerCase())) {
     throw new Error("invalid gender");
   }
 }
@@ -32,7 +28,7 @@ function validateuserdata(req) {
     "gender",
     "about",
     "age",
-    "profilePic",
+    "photoUrl",
   ];
 
   const isallowed = Object.keys(req.body).every((fields) =>

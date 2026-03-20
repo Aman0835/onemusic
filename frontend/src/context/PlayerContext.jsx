@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const PlayerContext = createContext();
 
@@ -107,6 +107,7 @@ export const PlayerProvider = ({ children }) => {
         break;
 
       case window.YT.PlayerState.PLAYING:
+        try { playerRef.current.unMute(); } catch(e) {}
         setIsPlaying(true);
         break;
 
@@ -193,144 +194,104 @@ export const PlayerProvider = ({ children }) => {
     }
   }, [activeTrack, playerReady]);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (!playerRef.current || !window.YT) return;
-
     const state = playerRef.current.getPlayerState();
     if (state === window.YT.PlayerState.PLAYING) playerRef.current.pauseVideo();
     else playerRef.current.playVideo();
-  };
+  }, [playerReady]);
 
-  const play = () => {
+  const play = useCallback(() => {
     if (!playerRef.current || !window.YT) return;
+    try { playerRef.current.unMute(); } catch(e) {}
     playerRef.current.playVideo();
-  };
+  }, [playerReady]);
 
-  const pause = () => {
+  const pause = useCallback(() => {
     if (!playerRef.current || !window.YT) return;
     playerRef.current.pauseVideo();
-  };
+  }, [playerReady]);
 
-  const setVolume = (v) => {
+  const setVolume = useCallback((v) => {
     if (!playerRef.current) return;
     playerRef.current.unMute();
     playerRef.current.setVolume(v);
-  };
+  }, [playerReady]);
 
-  const setActiveTrack = (track) => {
+  const setActiveTrack = useCallback((track) => {
     setQueue([track]);
     setCurrentIndex(0);
-  };
+  }, []);
 
-  const setQueueAndPlay = (tracks, index) => {
-    console.log("setQueueAndPlay invoked with tracks:", tracks?.length, "index:", index);
-    if (!Array.isArray(tracks) || tracks.length === 0) {
-      console.log("setQueueAndPlay failed: tracks not array or empty");
-      return;
-    }
-
+  const setQueueAndPlay = useCallback((tracks, index) => {
+    if (!Array.isArray(tracks) || tracks.length === 0) return;
     const selected = tracks[index];
     const filtered = tracks.filter((track) => track?.id);
-    if (!filtered.length) {
-      console.log("setQueueAndPlay failed: no valid tracks with id");
-      return;
-    }
-
+    if (!filtered.length) return;
     const nextIndex = filtered.findIndex((track) => track.id === selected?.id);
     const safeIndex = nextIndex >= 0 ? nextIndex : 0;
     const targetTrack = filtered[safeIndex];
 
-    console.log("setQueueAndPlay playing targetTrack:", targetTrack?.id, "at safeIndex:", safeIndex);
-
-    // Try to start immediately on user click to avoid autoplay-policy timing issues.
     if (playerReady && playerRef.current && targetTrack?.id) {
       try {
-        console.log("setQueueAndPlay: Attempting immediate player spinup");
+        playerRef.current.unMute();
         playerRef.current.loadVideoById(targetTrack.id);
         playerRef.current.playVideo();
       } catch (e) {
-        console.warn("Immediate play failed, fallback to state-driven play", e);
+        console.warn("Immediate play failed", e);
       }
-    } else {
-      console.log("setQueueAndPlay: Delaying play due to playerReady:", playerReady, "targetTrack:", targetTrack?.id);
     }
-
     setQueue(filtered);
     setCurrentIndex(safeIndex);
-  };
+  }, [playerReady]);
 
-  const enterRoomMode = () => {
+  const enterRoomMode = useCallback(() => {
     if (isRoomModeRef.current) return;
     autoPlaySuppressRef.current = true;
     setTimeout(() => { autoPlaySuppressRef.current = false; }, 500);
-    
     unstartedAttemptsRef.current = 0;
-    
-    // Stop any playing personal track before entering room
     if (playerReady && playerRef.current && window.YT) {
       try {
         const state = playerRef.current.getPlayerState();
-        if (
-          state === window.YT.PlayerState.PLAYING || 
-          state === window.YT.PlayerState.BUFFERING ||
-          state === window.YT.PlayerState.UNSTARTED
-        ) {
+        if (state === window.YT.PlayerState.PLAYING || state === window.YT.PlayerState.BUFFERING) {
           playerRef.current.stopVideo();
         }
-      } catch (e) {
-        console.warn("Failed to stop on room entry", e);
-      }
+      } catch (e) {}
     }
-    
     setIsPlaying(false);
-
     setGlobalQueue(queueRef.current);
     globalQueueRef.current = queueRef.current;
-    
     setGlobalCurrentIndex(currentIndexRef.current);
     globalCurrentIndexRef.current = currentIndexRef.current;
-    
     setQueue([]);
     setCurrentIndex(-1);
-    
     setIsRoomMode(true);
     isRoomModeRef.current = true;
-  };
+  }, [playerReady]);
 
-  const exitRoomMode = () => {
+  const exitRoomMode = useCallback(() => {
     if (!isRoomModeRef.current) return;
     autoPlaySuppressRef.current = true;
     setTimeout(() => { autoPlaySuppressRef.current = false; }, 500);
-    
     unstartedAttemptsRef.current = 0;
-    
     const restoredQueue = globalQueueRef.current;
     if (!restoredQueue || restoredQueue.length === 0) {
       if (playerReady && playerRef.current) playerRef.current.stopVideo();
     }
-    
     const restoredIndex = globalCurrentIndexRef.current;
-    
     setQueue(restoredQueue);
     setCurrentIndex(restoredIndex);
-    
     setIsRoomMode(false);
     isRoomModeRef.current = false;
-
-    // Auto-resume personal tracks on room exit.
     const resumedTrack = restoredQueue[restoredIndex];
     if (playerReady && playerRef.current && resumedTrack?.id) {
       setTimeout(() => {
-        try {
-          playerRef.current.cueVideoById(resumedTrack.id);
-        } catch (e) {
-          console.warn("Auto-cue after exit failed", e);
-        }
+        try { playerRef.current.cueVideoById(resumedTrack.id); } catch (e) {}
       }, 50);
     }
-  };
+  }, [playerReady]);
 
-  const playNext = () => {
+  const playNext = useCallback(() => {
     const list = queueRef.current;
     const index = currentIndexRef.current;
     const mode = repeatModeRef.current;
@@ -359,9 +320,9 @@ export const PlayerProvider = ({ children }) => {
     if (mode === "all") {
       setCurrentIndex(0);
     }
-  };
+  }, []);
 
-  const playPrev = () => {
+  const playPrev = useCallback(() => {
     const list = queueRef.current;
     const index = currentIndexRef.current;
     const mode = repeatModeRef.current;
@@ -390,7 +351,7 @@ export const PlayerProvider = ({ children }) => {
     if (mode === "all") {
       setCurrentIndex(list.length - 1);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (!playerReady) return;
@@ -409,21 +370,21 @@ export const PlayerProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [playerReady]);
 
-  const seekToPercent = (percent) => {
+  const seekToPercent = useCallback((percent) => {
     if (!playerRef.current || !duration) return;
     playerRef.current.seekTo(duration * percent, true);
-  };
+  }, [duration]);
 
-  const seekToSeconds = (seconds) => {
+  const seekToSeconds = useCallback((seconds) => {
     if (!playerRef.current) return;
     const safeSeconds = Math.max(0, Number(seconds) || 0);
     playerRef.current.seekTo(safeSeconds, true);
-  };
+  }, []);
 
-  const getCurrentTimeSeconds = () => {
+  const getCurrentTimeSeconds = useCallback(() => {
     if (!playerRef.current) return 0;
     return Number(playerRef.current.getCurrentTime?.() || 0);
-  };
+  }, []);
 
   return (
     <PlayerContext.Provider

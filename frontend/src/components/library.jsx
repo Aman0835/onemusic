@@ -56,7 +56,7 @@ export default function LibraryPage() {
 
   const { ref: gridScrollRef, isDragging: isGridDragging } = useScrollGrab();
 
-  // ⭐ Cleaned — NO ACCESS TOKEN
+  
   useEffect(() => {
     const controller = new AbortController();
 
@@ -70,7 +70,7 @@ export default function LibraryPage() {
       try {
         setError(null);
 
-        // FIXED — no accessToken
+
         const data = await getLibraryData(controller.signal);
         const normalized = normalizeLibraryItems(data);
 

@@ -14,11 +14,11 @@ export default function Sidebar({ children }) {
     <aside className="h-full w-16 md:w-60">
       <nav className="relative h-full flex flex-col shadow-xl rounded-br-3xl rounded-tr-3xl bg-black/20 backdrop-blur-md border border-white/20 text-white w-16 md:w-60 transition-all duration-300">
         <div
-          className="p-3 md:p-4 pb-2 flex items-center justify-center cursor-pointer"
+          className="p-3 md:p-4 pb-2 flex items-center justify-center cursor-pointer group"
           onClick={() => navigate("/home")}>
-          <Headset
-            className="w-10 h-10 md:w-14 md:h-14 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)] hover:scale-[1.05]"
-          />
+          <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(4,167,46,0.3)] transition-transform group-hover:scale-110">
+            <img src="/logo.png" alt="OneMusic Logo" className="w-full h-full object-contain" />
+          </div>
           <h1 className="hidden md:block font-bold text-2xl p-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
             One Music
           </h1>

@@ -15,8 +15,8 @@ const ProfileCard = () => {
       >
         {/* Avatar */}
         <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#F9C97C] to-[#f7b733] shadow-lg flex-shrink-0 border-2 border-white/10 group-hover:scale-105 transition-transform overflow-hidden">
-          {user.avatar ? (
-            <img src={user.avatar} alt="User Avatar" className="w-full h-full object-cover" />
+          {user.photoUrl ? (
+            <img src={user.photoUrl} alt="User Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-black font-black text-lg">
                {user.firstName?.[0]?.toUpperCase()}

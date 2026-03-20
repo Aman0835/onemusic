@@ -1,8 +1,16 @@
 import axios from "axios";
-import { Eye, EyeOff } from "lucide-react";
+import { 
+  Eye, 
+  EyeOff, 
+  Mail, 
+  Lock, 
+  Music, 
+  ChevronRight,
+  LogIn
+} from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { addUser } from "../utils/UserSlice";
 
 const AUTH_API_BASE =
@@ -17,19 +25,18 @@ export default function Login() {
   const [emailId, setEmailId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isSignup, setIsSignup] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [gender, setGender] = useState("");
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    
     try {
-      setError("");
       const req = await axios.post(
         AUTH_API_BASE + "/login",
         {
@@ -45,198 +52,94 @@ export default function Login() {
       dispatch(addUser(user));
       navigate("/home");
     } catch (error) {
-      setError(error?.response?.data || error?.message || "something went wrong");
+      setError(error?.response?.data || error?.message || "Something went wrong");
       console.error(error);
-    }
-  };
-
-  const handleSignup = async () => {
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    try {
-      setError("");
-      const req = await axios.post(
-        AUTH_API_BASE + "/signup",
-        {
-          email: emailId,
-          password,
-          firstName,
-          lastName,
-          gender,
-        },
-        { withCredentials: true },
-      );
-
-      const user = extractUser(req.data);
-      if (!user) throw new Error("Invalid signup response");
-
-      dispatch(addUser(user));
-      navigate("/home");
-    } catch (error) {
-      setError(error?.response?.data || error?.message || "something went wrong");
-      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-white/10 text-black">
-      <div className="flex flex-col items-center">
-        <div className="flex items-center gap-4 mb-4">
-          <button
-            onClick={() => setIsSignup(false)}
-            className={`text-lg font-semibold underline rounded-3xl px-4 py-2 ${
-              !isSignup ? "text-black bg-green-500" : "text-gray-700"
-            }`}>
-            Log in
-          </button>
+    <div className="w-full min-h-screen flex items-start md:items-center justify-center p-6 py-12 bg-[#050505] text-white overflow-y-auto">
+      {/* Background Blurs */}
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
+         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#04A72E] rounded-full blur-[120px]"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600 rounded-full blur-[120px]"></div>
+      </div>
 
-          <div
-            onClick={() => setIsSignup(!isSignup)}
-            className="w-14 h-7 bg-white rounded-full cursor-pointer flex items-center p-1 border-4 border-black">
-            <div
-              className={`w-5 h-5 bg-gray-300 rounded-full shadow-[3px_3px_0px_#000] transform transition ${
-                isSignup ? "translate-x-7" : ""
-              }`}></div>
+      <div className="w-full max-w-md bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 md:p-12 shadow-2xl relative z-10 animate-in fade-in slide-in-from-bottom-8 my-auto">
+        
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 border border-white/10 overflow-hidden">
+            <img src="/logo.png" alt="OneMusic Logo" className="w-full h-full object-contain" />
+          </div>
+          <h1 className="text-3xl font-black tracking-tighter text-white">Welcome Back</h1>
+          <p className="text-zinc-500 text-sm font-medium mt-1">Ready to start the rhythm?</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="relative group">
+             <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[#04A72E] transition-colors" />
+             <input
+               required
+               type="email"
+               placeholder="Email Address"
+               className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-[#04A72E]/50 focus:bg-white/10 transition-all text-sm font-medium"
+               onChange={(e) => setEmailId(e.target.value)}
+               value={emailId}
+             />
+          </div>
+
+          <div className="relative group">
+             <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-[#04A72E] transition-colors" />
+             <input
+               required
+               type={showPassword ? "text" : "password"}
+               placeholder="Password"
+               className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 outline-none focus:border-[#04A72E]/50 focus:bg-white/10 transition-all text-sm font-medium"
+               onChange={(e) => setPassword(e.target.value)}
+               value={password}
+             />
+             <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+          </div>
+
+          <div className="flex justify-end pr-1">
+             <button type="button" className="text-[10px] font-bold text-zinc-500 hover:text-[#04A72E] transition-colors uppercase tracking-widest">
+               Forgot Password?
+             </button>
           </div>
 
           <button
-            onClick={() => setIsSignup(true)}
-            className={`text-lg font-semibold rounded-3xl px-4 py-2 ${
-              isSignup ? "underline text-black bg-green-500" : "text-gray-700"
-            }`}>
-            Sign up
+            disabled={loading}
+            className="w-full relative group overflow-hidden bg-[#04A72E] hover:bg-[#038b26] text-black font-black py-4 rounded-2xl mt-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[20deg]"></div>
+            <span className="relative flex items-center justify-center gap-2">
+              {loading ? "LOGGING IN..." : "START LISTENING"}
+              {!loading && <ChevronRight size={18} />}
+            </span>
           </button>
-        </div>
 
-        <div className="bg-gray-300 border-4 border-black rounded-xl w-[360px] p-8 shadow-[8px_8px_0px_#000]">
-          <h2 className="text-3xl font-bold text-center mb-6">
-            {isSignup ? "Sign up" : "Log in"}
-          </h2>
+          <div className="text-center pt-6">
+            <Link to="/signup" className="text-xs font-bold text-zinc-500 hover:text-white transition-colors">
+              New here? <span className="text-[#04A72E]">Create an Account</span>
+            </Link>
+          </div>
 
-          {!isSignup && (
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleLogin();
-              }}>
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setEmailId(e.target.value)}
-                value={emailId}
-              />
-
-              <div className="relative w-full">
-                <input
-                  type={showLoginPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  className="w-full h-12 px-4 pr-12 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                  onChange={(e) => setPassword(e.target.value)}
-                  value={password}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowLoginPassword(!showLoginPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black">
-                  {showLoginPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
-              </div>
-
-              <p className="text-red-600">{error}</p>
-
-              <button
-                type="submit"
-                className="w-40 mx-auto h-12 bg-white border-4 border-black rounded-lg font-semibold shadow-[5px_5px_0px_#000] hover:translate-y-1 transition">
-                Login
-              </button>
-            </form>
+          {error && (
+            <div className="text-center pt-4 animate-in slide-in-from-top-2">
+               <p className="text-[11px] font-black text-red-400 bg-red-400/10 py-2 px-4 rounded-lg border border-red-400/20 uppercase tracking-widest">
+                 {error}
+               </p>
+            </div>
           )}
-
-          {isSignup && (
-            <form
-              className="flex flex-col gap-4"
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSignup();
-              }}>
-              <input
-                type="text"
-                placeholder="First Name"
-                required
-                className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setFirstName(e.target.value)}
-                value={firstName}
-              />
-
-              <input
-                type="text"
-                placeholder="Last Name"
-                required
-                className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setLastName(e.target.value)}
-                value={lastName}
-              />
-
-              <input
-                type="email"
-                placeholder="Email"
-                required
-                className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setEmailId(e.target.value)}
-                value={emailId}
-              />
-
-              <div className="relative w-full">
-                <input
-                  type={showSignupPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  className="w-full h-12 px-4 pr-12 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                  onChange={(e) => setPassword(e.target.value)}
-                  value={password}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowSignupPassword(!showSignupPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black">
-                  {showSignupPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
-              </div>
-              <input
-                type={showSignupPassword ? "text" : "password"}
-                placeholder="Confirm Password"
-                required
-                className="w-full h-12 px-4 pr-12 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                value={confirmPassword}
-              />
-
-              <input
-                required
-                type="text"
-                placeholder="Gender ex(male,female,other)"
-                className="w-full h-12 px-4 text-lg border-4 border-black rounded-lg bg-white shadow-[5px_5px_0px_#000]"
-                onChange={(e) => setGender(e.target.value)}
-                value={gender}></input>
-              <p className="text-red-600">{error}</p>
-
-              <button
-                type="submit"
-                className="w-40 mx-auto h-12 bg-white border-4 border-black rounded-lg font-semibold shadow-[5px_5px_0px_#000] hover:translate-y-1 transition">
-                Sign Up
-              </button>
-            </form>
-          )}
-        </div>
+        </form>
       </div>
     </div>
   );
