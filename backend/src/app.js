@@ -31,13 +31,11 @@ const envOrigins = (process.env.CLIENT_ORIGIN || "")
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-        
         if (allowedOrigins.has(origin)) {
           callback(null, true);
         } else {
-          console.log("Origin not allowed by CORS:", origin);
+          console.log("CORS Rejected for origin:", origin);
           callback(new Error("Not allowed by CORS"));
         }
       },
@@ -75,8 +73,10 @@ app.get("/search", async (req, res) => {
   console.log("YT Music Ready");
 })();
 
+console.log("Starting Database Connection...");
 connectDB()
   .then(() => {
+    console.log("Database Connection Success");
     const PORT = process.env.PORT || 5000;
 
     const server = app.listen(PORT, "0.0.0.0", () => {
