@@ -8,18 +8,13 @@ const { validateSingupData } = require("../helpers/validation");
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
 function getCookieOptions() {
-  // If we're on Railway or have a CLIENT_ORIGIN, we MUST use SameSite: none
-  const isCrossDomain = !!process.env.CLIENT_ORIGIN || !!process.env.RAILWAY_STATIC_URL;
-  const isProduction = process.env.NODE_ENV === "production" || isCrossDomain;
-
   return {
     httpOnly: true,
-    sameSite: isProduction ? "none" : "lax",
-    secure: isProduction, // Secure must be true for sameSite: none
+    secure: true,        
+    sameSite: "None",    
     expires: new Date(Date.now() + 8 * 3600000),
   };
 }
-
 function serializeUser(user) {
   return {
     id: user._id,
