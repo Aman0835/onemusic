@@ -103,7 +103,11 @@ authRouter.post("/login", async (req, res) => {
 authRouter.get("/me", async (req, res) => {
   try {
     const token = req.cookies?.token;
-    if (!token) return res.status(401).json({ error: "Not logged in" });
+    console.log("Session Check [/me]: Origin:", req.get('origin'), "| Cookies received:", !!token);
+    if (!token) {
+      console.log("Full Cookie Header:", req.headers.cookie);
+      return res.status(401).json({ error: "Not logged in" });
+    }
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded?._id || decoded?.id;
