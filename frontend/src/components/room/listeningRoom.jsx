@@ -239,7 +239,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
         console.log("Room loaded:", room.name, "Host ID:", room.host?._id || room.host);
         setPlaylist(room.queue || []);
         setRoomHostId(room.host?._id || room.host);
-        setRoomListeners(room.listeners || []);
+        setRoomListeners(room.activeMembers || []);
         if (room.votes) setTrackVotes((prev) => ({ ...room.votes, ...prev }));
       } catch (err) { console.error("Room load failed:", err); }
     };

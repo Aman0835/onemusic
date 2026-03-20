@@ -11,7 +11,7 @@ const roomSchema = new mongoose.Schema({
     ref: "user",
     required: true,
   },
-  listeners: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
+  activeMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }],
   queue: {
     type: Array,
     

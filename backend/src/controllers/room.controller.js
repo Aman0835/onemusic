@@ -11,7 +11,7 @@ const createRoom = async (req, res) => {
     const room = await Room.create({
       name,
       host: userId,
-      listeners: [],
+      activeMembers: [],
       queue: [],
       currentSong: null,
     });
@@ -41,8 +41,8 @@ const joinRoom = async (req, res) => {
     const room = await Room.findOne({ name });
     if (!room) return res.status(404).json({ error: "Room not found" });
 
-    if (!room.listeners.some((id) => id.toString() === userId.toString())) {
-      room.listeners.push(userId);
+    if (!room.activeMembers.some((id) => id.toString() === userId.toString())) {
+      room.activeMembers.push(userId);
       await room.save();
     }
 
@@ -129,7 +129,7 @@ const getRoomDetails = async (req, res) => {
   try {
     const room = await Room.findOne({ name })
       .populate("host", "firstName lastName _id photoUrl")
-      .populate("listeners", "firstName lastName _id photoUrl");
+      .populate("activeMembers", "firstName lastName _id photoUrl");
     if (!room) return res.status(404).json({ error: "Room not found" });
 
     res.json(room);

@@ -47,6 +47,10 @@ const envOrigins = (process.env.CLIENT_ORIGIN || "")
   app.use(express.json());
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.send("One Music Backend is Running ");
+});
+
 app.use("/api/data", dataRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRouter);
