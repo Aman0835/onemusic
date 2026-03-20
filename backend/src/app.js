@@ -14,11 +14,31 @@ const chatRooms = require("./routes/chats.routes");
 const app = express();
 const ytmusic = new YTMusic();
 
+const envOrigins = (process.env.CLIENT_ORIGIN || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = new Set([
+  ...envOrigins,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:5174",
+]);
+
 app.set("trust proxy", 1);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) {
+        callback(null, true);
+      } else {
+        console.log("CORS Rejected for origin:", origin);
+        callback(null, false); // Don't throw, just block origin
+      }
+    },
     credentials: true,
   })
 );
@@ -53,7 +73,7 @@ app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 connectDB()
   .then(() => {

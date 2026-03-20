@@ -10,9 +10,9 @@ const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 function getCookieOptions() {
   return {
     httpOnly: true,
-    secure: true,        
-    sameSite: "None",    
-    expires: new Date(Date.now() + 8 * 3600000),
+    secure: true,
+    sameSite: "None",
+    path: "/",            
   };
 }
 function serializeUser(user) {
