@@ -111,12 +111,9 @@ authRouter.get("/me", async (req, res) => {
 });
 
 authRouter.post("/logout", async (req, res) => {
-  const isProduction = process.env.NODE_ENV === "production" || process.env.CLIENT_ORIGIN?.includes("https");
   res.cookie("token", null, {
-    httpOnly: true,
-    sameSite: isProduction ? "none" : "lax",
-    secure: isProduction,
-    expires: new Date(Date.now()),
+    ...getCookieOptions(),
+    expires: new Date(0),
   });
   res.json({ message: "Logout successful" });
 });
