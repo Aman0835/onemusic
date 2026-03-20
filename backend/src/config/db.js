@@ -12,10 +12,10 @@ const connectDB = async () => {
     }
     console.log("Connecting to MongoDB at:", mongoUri.replace(/:([^@]+)@/, ":****@"));
     await mongoose.connect(mongoUri);
-    console.log("MongoDB connected successfully");
+    console.log("MongoDB connected successfully ");
   } catch (error) {
-    console.error("Database connection error:", error.message);
-    process.exit(1);
+    console.error("Database connection error :", error.message);
+    
   }
 };
 
