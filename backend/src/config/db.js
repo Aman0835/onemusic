@@ -10,12 +10,11 @@ const connectDB = async () => {
     if (!mongoUri) {
       throw new Error("MONGO_URI is not defined in environment variables");
     }
-    console.log("Connecting to MongoDB at:", mongoUri.replace(/:([^@]+)@/, ":****@"));
+    console.log("Connecting to MongoDB at :", mongoUri.replace(/:([^@]+)@/, ":****@"));
     await mongoose.connect(mongoUri);
     console.log("MongoDB connected successfully ");
   } catch (error) {
-    console.error("Database connection error :", error.message);
-    
+    console.error("Database connection error  :", error.message); 
   }
 };
 
