@@ -21,7 +21,7 @@ const envOrigins = (process.env.CLIENT_ORIGIN || "")
 
 const allowedOrigins = new Set([
   ...envOrigins,
-  "https://onemusic-eta.vercel.app/home"
+  "https://onemusic-eta.vercel.app"
 ]);
 
 app.set("trust proxy", 1);
