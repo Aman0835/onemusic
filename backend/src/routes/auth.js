@@ -8,7 +8,7 @@ const { validateSingupData } = require("../helpers/validation");
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
 function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_STATIC_URL;
+  const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_STATIC_URL || !!process.env.RENDER;
   
   const options = {
     httpOnly: true,
@@ -19,8 +19,8 @@ function getCookieOptions() {
   if (isProduction) {
     options.secure = true;
     options.sameSite = "None";
-    // Avoid hardcoding domain if possible, or use a more generic one if needed
-    // options.domain = ".up.railway.app"; 
+    // For Render: do not set domain, let browser handle it from response origin
+    // For explicit domain control: options.domain = ".onrender.com"; or ".up.railway.app"
   } else {
     options.secure = false;
     options.sameSite = "Lax";

@@ -11,9 +11,8 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { addUser } from "../utils/UserSlice";
 
-const AUTH_API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  `${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/api/auth`;
+
+  const AUTH_API_BASE = `${import.meta.env.VITE_API_BASE}/api/auth`;
 
 function extractUser(payload) {
   return payload?.user || payload || null;
