@@ -71,6 +71,7 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
     repeatMode,
     setRepeatMode,
     setVolume,
+    volume,
     seekToSeconds,
     getCurrentTimeSeconds,
     enterRoomMode,
@@ -97,11 +98,21 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
   };
 
   const isRoomHost = useMemo(() => {
-    const isHost = Boolean(roomHostId && userId && String(roomHostId) === String(userId));
-    return isHost;
+    if (!roomHostId || !userId) return false;
+    const hostId = typeof roomHostId === 'object' ? (roomHostId?._id || roomHostId?.id) : roomHostId;
+    const currentUserId = typeof userId === 'object' ? (userId?._id || userId?.id) : userId;
+    return String(hostId) === String(currentUserId);
   }, [roomHostId, userId]);
 
   const canControlTransport = activePermissions === "Everyone" || isRoomHost;
+  
+  const {
+    setIsHost,
+  } = usePlayer();
+
+  useEffect(() => {
+    setIsHost(isRoomHost);
+  }, [isRoomHost, setIsHost]);
 
   useEffect(() => {
     localStorage.setItem("one_music_room_client_id", clientIdRef.current);
@@ -412,7 +423,11 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
   };
 
   const handlePlayPauseSync = () => {
-    if (!canControlTransport) return;
+    console.log("[Room] Play/Pause clicked. Host:", isRoomHost, "Can Control:", canControlTransport);
+    if (!canControlTransport) {
+      showToast("Only the host can control playback.");
+      return;
+    }
     const targetPlayState = !isPlayingRef.current;
     togglePlayPause();
     sendRoomEvent({ type: "play_pause", shouldPlay: targetPlayState });
@@ -573,6 +588,7 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
             setShuffle={setShuffle}
             repeatMode={repeatMode}
             setRepeatMode={setRepeatMode}
+            volume={volume}
             onVolumeChange={setVolume}
             isHost={isRoomHost}
             isRoomMode={true}

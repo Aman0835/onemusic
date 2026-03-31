@@ -89,7 +89,7 @@ export default function RoomLobby() {
   };
 
   return (
-    <div className="w-full h-full bg-[#0a0a0a] text-white overflow-y-auto scrollbar-hide py-4 md:py-8 pb-12">
+    <div className="w-full h-full bg-[#0a0a0a] text-white overflow-y-auto scrollbar-hide py-4 md:py-8 pb-4">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         
         <header className="mb-8 animate-in fade-in slide-in-from-top duration-700">

@@ -52,7 +52,7 @@ const PlayerBar = ({
   };
 
   return (
-    <footer className="w-full h-24 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-2 relative">
+    <footer className="w-full h-20 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-1.5 relative">
       <div className="h-full grid grid-cols-[auto_1fr_auto] items-center md:gap-8 gap-1">
       <div className="min-w-0 flex items-center gap-2 md:gap-3">
         {activeTrack && (
@@ -201,7 +201,7 @@ const PlayerBar = ({
               className="w-24 h-1 absolute appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
               style={{
                 transform: "rotate(-90deg)",
-                background: `linear-gradient(to right, #04A72E ${volume}%, rgba(255,255,255,0.2) ${volume}%)`,
+                background: `linear-gradient(to right, #04A72E ${volume ?? 0}%, rgba(255,255,255,0.2) ${volume ?? 0}%)`,
               }}
             />
           </div>
@@ -230,7 +230,7 @@ const PlayerBar = ({
             }}
             className="w-28 h-1 appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
             style={{
-              background: `linear-gradient(to right, #04A72E ${volume}%, rgba(255,255,255,0.2) ${volume}%)`,
+              background: `linear-gradient(to right, #04A72E ${volume ?? 0}%, rgba(255,255,255,0.2) ${volume ?? 0}%)`,
             }}
           />
         </div>

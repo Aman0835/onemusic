@@ -33,6 +33,8 @@ export const PlayerProvider = ({ children }) => {
   const [isRoomMode, setIsRoomMode] = useState(false);
   const isRoomModeRef = useRef(false);
   const [roomTrack, setRoomTrack] = useState(null);
+  const [isHost, setIsHost] = useState(false);
+  const isHostRef = useRef(false);
   
   const rawActiveTrack = isRoomMode ? roomTrack : (queue[currentIndex] || null);
   const activeTrack = rawActiveTrack;
@@ -122,6 +124,13 @@ export const PlayerProvider = ({ children }) => {
         if (repeatModeRef.current === "one") {
           playerRef.current.seekTo(0);
           playerRef.current.playVideo();
+          return;
+        }
+        // In Room Mode, only the host triggers autoplay. 
+        // Listeners wait for the host's sync message.
+        if (isRoomModeRef.current && !isHostRef.current) {
+          console.log("[PlayerContext] Song ended. Waiting for host to trigger next...");
+          setIsPlaying(false); // Make sure we show play button
           return;
         }
         playNext();
@@ -372,11 +381,14 @@ export const PlayerProvider = ({ children }) => {
       let next = Math.floor(Math.random() * list.length);
       if (next === index) next = (next + 1) % list.length;
       setCurrentIndex(next);
+      if (isRoomModeRef.current) setRoomTrack(list[next]);
       return;
     }
 
     if (index < list.length - 1) {
-      setCurrentIndex(index + 1);
+      const nextIdx = index + 1;
+      setCurrentIndex(nextIdx);
+      if (isRoomModeRef.current) setRoomTrack(list[nextIdx]);
       return;
     }
 
@@ -403,11 +415,14 @@ export const PlayerProvider = ({ children }) => {
       let prev = Math.floor(Math.random() * list.length);
       if (prev === index) prev = (prev + 1) % list.length;
       setCurrentIndex(prev);
+      if (isRoomModeRef.current) setRoomTrack(list[prev]);
       return;
     }
 
     if (index > 0) {
-      setCurrentIndex(index - 1);
+      const prevIdx = index - 1;
+      setCurrentIndex(prevIdx);
+      if (isRoomModeRef.current) setRoomTrack(list[prevIdx]);
       return;
     }
 
@@ -527,6 +542,11 @@ export const PlayerProvider = ({ children }) => {
         enterRoomMode,
         exitRoomMode,
         setRoomTrack,
+        isHost,
+        setIsHost: (val) => {
+          setIsHost(val);
+          isHostRef.current = val;
+        },
       }}>
       <YouTubePlayerContainer />
       {children}
