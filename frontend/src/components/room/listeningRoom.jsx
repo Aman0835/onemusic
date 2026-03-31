@@ -110,32 +110,6 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
     setIsHost,
   } = usePlayer();
 
-  useEffect(() => {
-    setIsHost(isRoomHost);
-  }, [isRoomHost, setIsHost]);
-
-  // Keep PlayerContext queue in sync with dynamic Room Playlist (Votes/Likes)
-  const { updateQueueOnly } = usePlayer();
-  useEffect(() => {
-    if (!orderedPlaylist.length || !activeTrack?.id) return;
-    const newIdx = orderedPlaylist.findIndex(t => t.id === activeTrack.id);
-    if (newIdx !== -1) {
-      updateQueueOnly(orderedPlaylist, newIdx);
-    }
-  }, [orderedPlaylist, activeTrack?.id, updateQueueOnly]);
-
-  useEffect(() => {
-    localStorage.setItem("one_music_room_client_id", clientIdRef.current);
-    enterRoomMode();
-    return () => {
-      exitRoomMode();
-    };
-  }, []);
-
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
-
   const applyVote = (trackId, voterId, value) => {
     setTrackVotes((prev) => ({
       ...prev,
@@ -162,8 +136,34 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
   }, [playlist, trackVotes, activeTrack?.id]);
 
   useEffect(() => {
+    setIsHost(isRoomHost);
+  }, [isRoomHost, setIsHost]);
+
+  useEffect(() => {
+    localStorage.setItem("one_music_room_client_id", clientIdRef.current);
+    enterRoomMode();
+    return () => {
+      exitRoomMode();
+    };
+  }, []);
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
     orderedPlaylistRef.current = orderedPlaylist;
   }, [orderedPlaylist]);
+
+  // Keep PlayerContext queue in sync with dynamic Room Playlist (Votes/Likes)
+  const { updateQueueOnly } = usePlayer();
+  useEffect(() => {
+    if (!orderedPlaylist.length || !activeTrack?.id) return;
+    const newIdx = orderedPlaylist.findIndex(t => t.id === activeTrack.id);
+    if (newIdx !== -1) {
+      updateQueueOnly(orderedPlaylist, newIdx);
+    }
+  }, [orderedPlaylist, activeTrack?.id, updateQueueOnly]);
 
   const handleSocketMessage = useCallback((payload) => {
     if (payload.type === "active_users") {
@@ -323,7 +323,8 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  const handleSelectTrack = (id, shouldSync = true, selectedQueue = orderedPlaylist) => {
+  const handleSelectTrack = (id, shouldSync = true, passedQueue = null) => {
+    const selectedQueue = passedQueue || orderedPlaylist;
     if (shouldSync && !isRoomHost) {
       showToast("Only the host can select tracks.");
       return;
