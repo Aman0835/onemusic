@@ -176,7 +176,7 @@ export const PlayerProvider = ({ children }) => {
         unstartedAttemptsRef.current = 0;
         if (repeatModeRef.current !== "one") playNext();
       }
-    }, 150);
+    }, 350); // Increased buffer for mobile metadata settling
   };
 
   useEffect(() => {
@@ -185,7 +185,11 @@ export const PlayerProvider = ({ children }) => {
     if (!activeTrack) {
       if (playerRef.current && window.YT) {
         try {
-          // If queue is completely empty, forcefully kill the active feed
+          // If in transition to/from Room Mode, don't stop immediately
+          if (autoPlaySuppressRef.current) return;
+          // If in Room Mode but waiting for initial track sync, don't stop
+          if (isRoomModeRef.current && !roomTrack) return;
+
           playerRef.current.stopVideo();
         } catch (e) {
           console.warn("Failed to stop video on empty queue", e);
@@ -299,9 +303,13 @@ export const PlayerProvider = ({ children }) => {
 
   const enterRoomMode = useCallback(() => {
     if (isRoomModeRef.current) return;
+    setIsRoomMode(true);
+    isRoomModeRef.current = true;
+    
     autoPlaySuppressRef.current = true;
-    setTimeout(() => { autoPlaySuppressRef.current = false; }, 500);
+    setTimeout(() => { autoPlaySuppressRef.current = false; }, 800);
     unstartedAttemptsRef.current = 0;
+
     if (playerReady && playerRef.current && window.YT) {
       try {
         const state = playerRef.current.getPlayerState();
@@ -310,15 +318,18 @@ export const PlayerProvider = ({ children }) => {
         }
       } catch (e) {}
     }
-    setIsPlaying(false);
+
+    const state = playerRef.current?.getPlayerState?.();
+    if (state !== window.YT?.PlayerState?.PLAYING && state !== window.YT?.PlayerState?.BUFFERING) {
+      setIsPlaying(false);
+    }
+
     setGlobalQueue(queueRef.current);
     globalQueueRef.current = queueRef.current;
     setGlobalCurrentIndex(currentIndexRef.current);
     globalCurrentIndexRef.current = currentIndexRef.current;
     setQueue([]);
     setCurrentIndex(-1);
-    setIsRoomMode(true);
-    isRoomModeRef.current = true;
   }, [playerReady]);
 
   const exitRoomMode = useCallback(() => {
