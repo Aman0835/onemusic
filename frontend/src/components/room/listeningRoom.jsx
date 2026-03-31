@@ -114,6 +114,16 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
     setIsHost(isRoomHost);
   }, [isRoomHost, setIsHost]);
 
+  // Keep PlayerContext queue in sync with dynamic Room Playlist (Votes/Likes)
+  const { updateQueueOnly } = usePlayer();
+  useEffect(() => {
+    if (!orderedPlaylist.length || !activeTrack?.id) return;
+    const newIdx = orderedPlaylist.findIndex(t => t.id === activeTrack.id);
+    if (newIdx !== -1) {
+      updateQueueOnly(orderedPlaylist, newIdx);
+    }
+  }, [orderedPlaylist, activeTrack?.id, updateQueueOnly]);
+
   useEffect(() => {
     localStorage.setItem("one_music_room_client_id", clientIdRef.current);
     enterRoomMode();

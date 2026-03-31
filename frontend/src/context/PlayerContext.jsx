@@ -310,6 +310,13 @@ export const PlayerProvider = ({ children }) => {
     setCurrentIndex(safeIndex);
   }, [playerReady]);
 
+  const updateQueueOnly = useCallback((newQueue, newIndex) => {
+    const filtered = (newQueue || []).filter(t => t?.id);
+    setQueue(filtered);
+    currentIndexRef.current = newIndex;
+    setCurrentIndex(newIndex);
+  }, []);
+
   const enterRoomMode = useCallback(() => {
     if (isRoomModeRef.current) return;
     setIsRoomMode(true);
@@ -547,6 +554,7 @@ export const PlayerProvider = ({ children }) => {
           setIsHost(val);
           isHostRef.current = val;
         },
+        updateQueueOnly,
       }}>
       <YouTubePlayerContainer />
       {children}
