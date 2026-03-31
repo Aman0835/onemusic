@@ -48,6 +48,7 @@ const AppContent = () => {
     togglePlayPause,
     playNext,
     playPrev,
+    volume,
     setVolume,
     shuffle,
     setShuffle,
@@ -167,6 +168,7 @@ const AppContent = () => {
             repeatMode={repeatMode}
             setRepeatMode={setRepeatMode}
             isRoomMode={isRoomMode}
+            volume={volume}
           />
         </div>
       )}

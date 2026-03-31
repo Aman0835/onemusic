@@ -49,6 +49,8 @@ export const PlayerProvider = ({ children }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [volume, setVolumeState] = useState(66);
+  const volumeRef = useRef(66);
 
   const [repeatMode, setRepeatMode] = useState("off"); // off | one | all
   const [shuffle, setShuffle] = useState(false);
@@ -230,10 +232,41 @@ export const PlayerProvider = ({ children }) => {
   }, [playerReady]);
 
   const setVolume = useCallback((v) => {
+    const val = Math.max(0, Math.min(100, v));
+    setVolumeState(val);
+    volumeRef.current = val;
     if (!playerRef.current) return;
-    playerRef.current.unMute();
-    playerRef.current.setVolume(v);
+    try {
+      playerRef.current.unMute();
+      playerRef.current.setVolume(val);
+    } catch (e) {}
   }, [playerReady]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if typing in an input/textarea
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+
+      if (e.key === "ArrowUp" || e.key === "AudioVolumeUp") {
+        e.preventDefault();
+        setVolume(volumeRef.current + 5);
+      } else if (e.key === "ArrowDown" || e.key === "AudioVolumeDown") {
+        e.preventDefault();
+        setVolume(volumeRef.current - 5);
+      } else if (e.key.toLowerCase() === "m") {
+        // Toggle Mute
+        if (volumeRef.current > 0) {
+          window._oldVol = volumeRef.current;
+          setVolume(0);
+        } else {
+          setVolume(window._oldVol || 66);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setVolume]);
 
   const setActiveTrack = useCallback((track) => {
     setQueue([track]);
@@ -403,6 +436,52 @@ export const PlayerProvider = ({ children }) => {
     return Number(playerRef.current.getCurrentTime?.() || 0);
   }, []);
 
+  useEffect(() => {
+    if (!navigator.mediaSession || !activeTrack) return;
+
+    try {
+      // 1. Update Metadata
+      navigator.mediaSession.metadata = new window.MediaMetadata({
+        title: activeTrack.title || "Unknown Title",
+        artist: activeTrack.subtitle || "One Music Artist",
+        album: activeTrack.album || "One Music",
+        artwork: [
+          { src: activeTrack.imageUrl || "/logo.png", sizes: "96x96", type: "image/png" },
+          { src: activeTrack.imageUrl || "/logo.png", sizes: "128x128", type: "image/png" },
+          { src: activeTrack.imageUrl || "/logo.png", sizes: "192x192", type: "image/png" },
+          { src: activeTrack.imageUrl || "/logo.png", sizes: "256x256", type: "image/png" },
+          { src: activeTrack.imageUrl || "/logo.png", sizes: "384x384", type: "image/png" },
+          { src: activeTrack.imageUrl || "/logo.png", sizes: "512x512", type: "image/png" },
+        ],
+      });
+
+      // 2. Set Action Handlers
+      const actionHandlers = [
+        ['play', play],
+        ['pause', pause],
+        ['previoustrack', playPrev],
+        ['nexttrack', playNext],
+        ['seekto', (details) => {
+          if (details.seekTime !== undefined) seekToSeconds(details.seekTime);
+        }],
+      ];
+
+      for (const [action, handler] of actionHandlers) {
+        try {
+          navigator.mediaSession.setActionHandler(action, handler);
+        } catch (error) {
+          console.warn(`The media session action "${action}" is not supported yet.`);
+        }
+      }
+
+      // 3. Update Playback State
+      navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+
+    } catch (e) {
+      console.error("MediaSession error:", e);
+    }
+  }, [activeTrack, isPlaying, play, pause, playNext, playPrev, seekToSeconds]);
+
   return (
     <PlayerContext.Provider
       value={{
@@ -421,6 +500,7 @@ export const PlayerProvider = ({ children }) => {
         pause,
         playNext,
         playPrev,
+        volume,
         setVolume,
         setActiveTrack,
         setQueueAndPlay,

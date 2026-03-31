@@ -24,8 +24,8 @@ const PlayerBar = ({
   setRepeatMode,
   isRoomMode,
   isHost,
+  volume,
 }) => {
-  const [volume, setVolumeLocal] = useState(66);
   const [oldVolume, setOldVolume] = useState(66);
   const [toast, setToast] = useState(null);
 
@@ -45,10 +45,8 @@ const PlayerBar = ({
   const toggleMute = () => {
     if (volume > 0) {
       setOldVolume(volume);
-      setVolumeLocal(0);
       onVolumeChange?.(0);
     } else {
-      setVolumeLocal(oldVolume);
       onVolumeChange?.(oldVolume);
     }
   };
@@ -65,7 +63,7 @@ const PlayerBar = ({
               className="w-10 h-10 md:w-14 md:h-14 rounded-md object-cover shadow-md"
             />
 
-            <div className="flex flex-col min-w-0">
+            <div className="hidden md:flex flex-col min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-white font-semibold truncate max-w-[100px] sm:max-w-[140px] md:max-w-[200px]">
                   {activeTrack.title}
@@ -148,7 +146,7 @@ const PlayerBar = ({
         </div>
 
         {activeTrack && (
-          <div className="hidden sm:flex items-center gap-2 w-[280px] md:w-[420px] text-xs text-zinc-400">
+          <div className="flex items-center gap-2 w-[160px] sm:w-[280px] md:w-[420px] text-[10px] sm:text-xs text-zinc-400">
             <span>{activeTrack.currentTime}</span>
 
             <div
@@ -198,7 +196,6 @@ const PlayerBar = ({
               value={volume}
               onChange={(e) => {
                 const v = Number(e.target.value);
-                setVolumeLocal(v);
                 onVolumeChange?.(v);
               }}
               className="w-24 h-1 absolute appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
@@ -229,7 +226,6 @@ const PlayerBar = ({
             value={volume}
             onChange={(e) => {
               const v = Number(e.target.value);
-              setVolumeLocal(v);
               onVolumeChange?.(v);
             }}
             className="w-28 h-1 appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
