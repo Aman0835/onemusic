@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const { getCookieOptions } = require("../helpers/cookieOptions");
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey9029";
-const COOKIE_TIME = 7 * 24 * 60 * 60 * 1000;
 
 exports.registerUser = async (req, res) => {
   try {
@@ -31,13 +30,7 @@ exports.registerUser = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/",
-      maxAge: COOKIE_TIME,
-    });
+    res.cookie("token", token, getCookieOptions());
 
     res.json({
       message: "Signup successful",
@@ -73,13 +66,7 @@ exports.loginUser = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      path: "/",
-      maxAge: COOKIE_TIME,
-    });
+    res.cookie("token", token, getCookieOptions());
 
     res.json({
       message: "Login successful",
