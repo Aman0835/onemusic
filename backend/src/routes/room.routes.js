@@ -15,11 +15,11 @@ const router = express.Router();
 
 router.post("/create", authMiddleware, createRoom);
 router.get("/my-rooms", authMiddleware, getMyRooms);
-router.post("/:name/queue", authMiddleware, addMusicToQueue);
-router.delete("/:name/queue/:songId", authMiddleware, deleteMusicFromQueue);
-router.post("/:name/vote", authMiddleware, castVote);
+router.post("/:id/queue", authMiddleware, addMusicToQueue);
+router.delete("/:id/queue/:songId", authMiddleware, deleteMusicFromQueue);
+router.post("/:id/vote", authMiddleware, castVote);
 router.post("/join", authMiddleware, joinRoom);
-router.delete("/:name", authMiddleware, deleteRoom);
-router.get("/:name", authMiddleware, getRoomDetails);
+router.delete("/:id", authMiddleware, deleteRoom);
+router.get("/:id", authMiddleware, getRoomDetails);
 
 module.exports = router;

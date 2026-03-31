@@ -53,18 +53,18 @@ const joinRoom = async (req, res) => {
 };
 
 const deleteRoom = async (req, res) => {
-  const { name } = req.params;
+  const { id } = req.params;
   const userId = req.user._id;
 
   try {
-    const room = await Room.findOne({ name });
+    const room = await Room.findById(id);
     if (!room) return res.status(404).json({ error: "Room not found" });
 
     if (room.host.toString() !== userId.toString()) {
       return res.status(403).json({ error: "Only host can delete room" });
     }
 
-    await Room.deleteOne({ name });
+    await Room.findByIdAndDelete(id);
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ error: "Server error" });
@@ -72,12 +72,12 @@ const deleteRoom = async (req, res) => {
 };
 
 const addMusicToQueue = async (req, res) => {
-  const { name } = req.params;
+  const { id } = req.params;
   const { song } = req.body;
   const userId = req.user._id;
 
   try {
-    const room = await Room.findOne({ name });
+    const room = await Room.findById(id);
     if (!room) return res.status(404).json({ error: "Room not found" });
     const exists = room.queue.some((s) => s.id === song.id);
 
@@ -101,11 +101,11 @@ const addMusicToQueue = async (req, res) => {
 };
 
 const deleteMusicFromQueue = async (req, res) => {
-  const { name, songId } = req.params;
+  const { id, songId } = req.params;
   const userId = req.user._id;
 
   try {
-    const room = await Room.findOne({ name });
+    const room = await Room.findById(id);
     if (!room) return res.status(404).json({ error: "Room not found" });
 
     if (room.host.toString() !== userId.toString()) {
@@ -124,10 +124,10 @@ const deleteMusicFromQueue = async (req, res) => {
 };
 
 const getRoomDetails = async (req, res) => {
-  const { name } = req.params;
+  const { id } = req.params;
 
   try {
-    const room = await Room.findOne({ name })
+    const room = await Room.findById(id)
       .populate("host", "firstName lastName _id photoUrl")
       .populate("activeMembers", "firstName lastName _id photoUrl");
     if (!room) return res.status(404).json({ error: "Room not found" });
@@ -139,12 +139,12 @@ const getRoomDetails = async (req, res) => {
 };
 
 const castVote = async (req, res) => {
-  const { name } = req.params;
+  const { id } = req.params;
   const { trackId, value } = req.body;
   const userId = req.user._id.toString();
 
   try {
-    const room = await Room.findOne({ name });
+    const room = await Room.findById(id);
     if (!room) return res.status(404).json({ error: "Room not found" });
 
     // Deep copy votes object to ensure change detection
@@ -157,7 +157,7 @@ const castVote = async (req, res) => {
     room.markModified("votes");
     await room.save();
     
-    console.log(`Vote saved for room ${name}, track ${trackId}`);
+    console.log(`Vote saved for room id ${id}, track ${trackId}`);
     return res.json(room);
   } catch (err) {
     console.error("Vote cast error:", err);

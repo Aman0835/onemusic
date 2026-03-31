@@ -146,7 +146,7 @@ const AppContent = () => {
             <Route path="/artist" element={<Artist />} />
             <Route path="/album" element={<Album />} />
             <Route path="/room" element={<RoomLobby />} />
-            <Route path="/room/:roomName" element={<ListeningRoom />} />
+            <Route path="/room/:roomId" element={<ListeningRoom />} />
             <Route path="/Home" element={<Navigate to="/home" replace />} />
           </Routes>
           </main>

@@ -15,17 +15,17 @@ export const createRoomAPI = async (name) =>
 export const joinRoomAPI = async (name) =>
   (await axios.post(`${API}/join`, { name }, authConfig())).data;
 
-export const deleteRoomAPI = async (name) =>
-  (await axios.delete(`${API}/${encodeURIComponent(name)}`, authConfig())).data;
+export const deleteRoomAPI = async (roomId) =>
+  (await axios.delete(`${API}/${roomId}`, authConfig())).data;
 
-export const getRoomDetailsAPI = async (name) =>
-  (await axios.get(`${API}/${encodeURIComponent(name)}`, authConfig())).data;
+export const getRoomDetailsAPI = async (roomId) =>
+  (await axios.get(`${API}/${roomId}`, authConfig())).data;
 
-export const addMusicToQueueAPI = async (name, song) =>
-  (await axios.post(`${API}/${encodeURIComponent(name)}/queue`, { song }, authConfig())).data;
+export const addMusicToQueueAPI = async (roomId, song) =>
+  (await axios.post(`${API}/${roomId}/queue`, { song }, authConfig())).data;
 
-export const deleteMusicFromQueueAPI = async (name, songId) =>
-  (await axios.delete(`${API}/${encodeURIComponent(name)}/queue/${songId}`, authConfig())).data;
+export const deleteMusicFromQueueAPI = async (roomId, songId) =>
+  (await axios.delete(`${API}/${roomId}/queue/${songId}`, authConfig())).data;
 
-export const castVoteAPI = async (name, trackId, value) =>
-  (await axios.post(`${API}/${encodeURIComponent(name)}/vote`, { trackId, value }, authConfig())).data;
+export const castVoteAPI = async (roomId, trackId, value) =>
+  (await axios.post(`${API}/${roomId}/vote`, { trackId, value }, authConfig())).data;

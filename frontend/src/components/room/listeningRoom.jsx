@@ -35,11 +35,13 @@ import ShareRoomModal from "./modules/ShareRoomModal";
 const ROOM_API_BASE = API_BASE + "/api/rooms";
 const ROOM_WS_BASE = WS_BASE;
 
-const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
-  const { roomName: paramRoomName } = useParams();
+const ListeningRoom = ({ onExit: propOnExit }) => {
+  const { roomId } = useParams();
   const navigate = useNavigate();
-  const roomName = propRoomName || paramRoomName || "Global Room";
   const onExit = propOnExit || (() => navigate("/room"));
+
+  const [roomDetails, setRoomDetails] = useState(null);
+  const roomNameDisplay = roomDetails?.name || "Loading...";
 
   const containerRef = useRef(null);
   const orderedPlaylistRef = useRef([]);
@@ -53,7 +55,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
   );
   const user = useSelector((state) => state.user);
   const userId = user?.id || user?._id;
-  const roomWsUrl = `${ROOM_WS_BASE}/room/${encodeURIComponent(roomName)}?userId=${clientIdRef.current}`;
+  const roomWsUrl = `${ROOM_WS_BASE}/room/${encodeURIComponent(roomId)}?userId=${clientIdRef.current}`;
 
   const {
     setQueueAndPlay,
@@ -254,10 +256,10 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       if (shouldPlay && !isPlayingRef.current) play();
       if (!shouldPlay && isPlayingRef.current) pause();
     }
-  }, [roomName, getCurrentTimeSeconds, play, pause, playNext, playPrev, setQueueAndPlay, seekToSeconds]);
+  }, [roomId, getCurrentTimeSeconds, play, pause, playNext, playPrev, setQueueAndPlay, seekToSeconds]);
 
   const { sendRoomEvent, broadcastSyncState } = useRoomSocket({
-    roomName, userId, roomWsUrl, clientId: clientIdRef.current,
+    roomId, userId, roomWsUrl, clientId: clientIdRef.current,
     onMessage: handleSocketMessage, isHost: isRoomHost,
     activeTrackId: activeTrack?.id, getCurrentTimeSeconds, isPlaying,
     orderedPlaylist, trackVotes, roomHostId
@@ -274,8 +276,9 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
   useEffect(() => {
     const loadRoom = async () => {
       try {
-        const room = await getRoomDetailsAPI(roomName);
+        const room = await getRoomDetailsAPI(roomId);
         console.log("Room loaded:", room.name, "Host ID:", room.host?._id || room.host);
+        setRoomDetails(room);
         setPlaylist(room.queue || []);
         setRoomHostId(room.host?._id || room.host);
         setRoomListeners(room.activeMembers || []);
@@ -283,7 +286,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       } catch (err) { console.error("Room load failed:", err); }
     };
     loadRoom();
-  }, [roomName]);
+  }, [roomId]);
 
   useEffect(() => {
     const onFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -326,7 +329,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
     }
 
     try {
-      const updatedRoom = await addMusicToQueueAPI(roomName, track);
+      const updatedRoom = await addMusicToQueueAPI(roomId, track);
       setPlaylist(updatedRoom.queue);
       sendRoomEvent({ type: "queue_replace", queue: updatedRoom.queue });
 
@@ -359,7 +362,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       return;
     }
     try {
-      const updatedRoom = await deleteMusicFromQueueAPI(roomName, songId);
+      const updatedRoom = await deleteMusicFromQueueAPI(roomId, songId);
       setPlaylist(updatedRoom.queue);
       sendRoomEvent({ type: "queue_replace", queue: updatedRoom.queue });
       setTrackVotes((prev) => {
@@ -393,7 +396,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
     // DB Persistence (only if logged in)
     if (userId) {
       try {
-        await castVoteAPI(roomName, trackId, nextVote);
+        await castVoteAPI(roomId, trackId, nextVote);
       } catch (error) {
         console.error("Failed to persist vote:", error);
       }
@@ -457,7 +460,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       
       {/* Sidebar - Room Details (Hidden on mobile by default) */}
       <RoomSidebar
-        roomName={roomName}
+        roomName={roomNameDisplay}
         userActive={userActive}
         roomListeners={roomListeners}
         roomHostId={roomHostId}
@@ -482,7 +485,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
            >
              <ChevronLeft size={24} />
            </button>
-           <h2 className="font-bold text-sm truncate px-4">#{roomName}</h2>
+           <h2 className="font-bold text-sm truncate px-4">#{roomNameDisplay}</h2>
            <div className="flex items-center gap-2">
               <button 
                 onClick={() => setShowMobileSettings(true)}
@@ -598,7 +601,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
                 </button>
              </div>
              <div className="flex-1 overflow-hidden">
-                <Chat roomName={roomName} />
+                <Chat roomName={roomNameDisplay} />
              </div>
           </div>
       </div>
@@ -606,7 +609,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       {/* Share Room Modal */}
       {showShareModal && (
         <ShareRoomModal 
-          roomName={roomName} 
+          roomName={roomNameDisplay} 
           onClose={() => setShowShareModal(false)} 
         />
       )}

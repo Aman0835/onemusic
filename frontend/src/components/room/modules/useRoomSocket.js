@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 
 export const useRoomSocket = ({
-  roomName,
+  roomId,
   userId,
   roomWsUrl,
   clientId,
@@ -22,13 +22,13 @@ export const useRoomSocket = ({
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(
       JSON.stringify({
-        roomName,
+        roomId,
         senderId: clientId,
         sentAt: Date.now(),
         ...payload,
       }),
     );
-  }, [roomName, clientId]);
+  }, [roomId, clientId]);
 
   const broadcastSyncState = useCallback((override = {}) => {
     sendRoomEvent({
@@ -48,7 +48,7 @@ export const useRoomSocket = ({
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("WS Connected:", roomName);
+      console.log("WS Connected:", roomId);
       // Perform initial clock sync
       ws.send(JSON.stringify({ type: "ping", clientTime: Date.now() }));
     };
@@ -59,7 +59,7 @@ export const useRoomSocket = ({
       } catch {
         return;
       }
-      if (!payload || payload.roomName !== roomName) return;
+      if (!payload || (payload.roomId !== roomId && payload.roomName !== roomId)) return;
       if (payload.senderId === clientId) return;
 
       // Handle clock sync pong
@@ -87,7 +87,7 @@ export const useRoomSocket = ({
         ws.close();
       }
     };
-  }, [roomName, roomWsUrl, clientId, onMessage]);
+  }, [roomId, roomWsUrl, clientId, onMessage]);
 
   useEffect(() => {
     if (!isHost || !activeTrackId) return;

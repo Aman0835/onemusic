@@ -56,7 +56,7 @@ export default function RoomLobby() {
       const newRoom = await createRoomAPI(roomName);
       setRooms((prev) => [...prev, newRoom]);
       setRoomName("");
-      navigate(`/room/${newRoom.name}`);
+      navigate(`/room/${newRoom._id}`);
     } catch (e) {
       const errorMsg = e?.response?.data?.error || e?.response?.data?.message || e.message || "Failed to create room";
       setError(errorMsg);
@@ -72,7 +72,7 @@ export default function RoomLobby() {
     try {
       const room = await joinRoomAPI(joinName);
       setJoinName("");
-      navigate(`/room/${room.name}`);
+      navigate(`/room/${room._id}`);
     } catch (e) {
       setError("Room not found. Check the name and try again.");
     }
@@ -239,7 +239,7 @@ export default function RoomLobby() {
               {rooms.map((room) => (
                 <div
                   key={room._id}
-                  onClick={() => navigate(`/room/${room.name}`)}
+                  onClick={() => navigate(`/room/${room._id}`)}
                   className={`group relative overflow-hidden bg-white/5 border border-white/10 hover:border-white/30 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-black/50 ${
                     viewMode === 'list' ? 'flex items-center justify-between p-4' : 'p-6'
                   }`}
