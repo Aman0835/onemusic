@@ -1,6 +1,7 @@
 const User = require("../modules/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { getCookieOptions } = require("../helpers/cookieOptions");
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey9029";
 const COOKIE_TIME = 7 * 24 * 60 * 60 * 1000;
@@ -96,12 +97,9 @@ exports.loginUser = async (req, res) => {
 };
 
 exports.logoutUser = async (req, res) => {
-  res.cookie("token", "", { 
-    maxAge: 1,
-    httpOnly: true,
-    path: "/",
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  res.cookie("token", null, { 
+    ...getCookieOptions(),
+    expires: new Date(0),
   });
   res.json({ message: "Logged out successfully" });
 };

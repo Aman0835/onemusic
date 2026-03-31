@@ -13,8 +13,11 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    const userId = decoded?._id || decoded?.id;
-    if (!userId) return res.status(401).json({ error: "Invalid token" });
+    const userId = decoded?.id || decoded?._id;
+    if (!userId) {
+      console.log("Auth Error: Invalid payload in token", decoded);
+      return res.status(401).json({ error: "Invalid token" });
+    }
 
     const user = await User.findById(userId);
     if (!user) return res.status(401).json({ error: "User not found" });

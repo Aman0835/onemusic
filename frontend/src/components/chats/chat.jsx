@@ -66,6 +66,7 @@ const Chat = ({ roomName }) => {
       await fetch(`${API_BASE}/api/chat/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(messagePayload),
       });
     } catch (e) {
@@ -79,7 +80,9 @@ const Chat = ({ roomName }) => {
   useEffect(() => {
     const loadMessages = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/chat/${roomName}`);
+        const res = await fetch(`${API_BASE}/api/chat/${encodeURIComponent(roomName)}`, {
+          credentials: "include",
+        });
         const data = await res.json();
         setMessages(data);
       } catch (err) {

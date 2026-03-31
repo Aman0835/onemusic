@@ -7,7 +7,8 @@ import axios from "axios";
 import Button from "../Login/Button";
 import { removeUser } from "../utils/UserSlice";
 
-const AUTH_API_BASE = import.meta.env.VITE_API_BASE_URL;
+import { API_BASE } from "../../api/config";
+const AUTH_API_BASE = API_BASE + "/api/auth";
 
 const Logout = ({ iconOnly }) => {
   const navigate = useNavigate();

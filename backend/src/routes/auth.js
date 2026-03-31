@@ -4,20 +4,11 @@ const User = require("../modules/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validateSingupData } = require("../helpers/validation");
+const { getCookieOptions } = require("../helpers/cookieOptions");
 
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
-function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production";
-  
-  return {
-    httpOnly: true,
-    path: "/",
-    expires: new Date(Date.now() + 7 * 24 * 3600000), // 7 days
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-  };
-}
+// Helper removed - now imported from cookieOptions.js
 function serializeUser(user) {
   return {
     id: user._id,
