@@ -152,15 +152,38 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       return;
     }
     if (payload.type === "track_select" && payload.trackId) {
+      const now = Date.now();
+      const serverNow = now + (payload.clockOffset || 0);
+      const sentAt = payload.serverSentAt || payload.sentAt || now;
+      const delay = Math.max(0, (serverNow - sentAt) / 1000);
+
       const syncedQueue = Array.isArray(payload.queue) && payload.queue.length ? payload.queue : orderedPlaylistRef.current;
       setPlaylist(syncedQueue);
       const index = syncedQueue.findIndex((track) => track.id === payload.trackId);
-      if (index !== -1) setQueueAndPlay(syncedQueue, index);
+      if (index !== -1) {
+        setQueueAndPlay(syncedQueue, index);
+        // Compensate for message travel time if starting a new track
+        if (delay > 0.1) {
+          setTimeout(() => seekToSeconds(delay + 0.1), 800);
+        }
+      }
       return;
     }
     if (payload.type === "play_pause") {
       const shouldPlay = Boolean(payload.shouldPlay);
-      if (shouldPlay && !isPlayingRef.current) play();
+      const now = Date.now();
+      const serverNow = now + (payload.clockOffset || 0);
+      const sentAt = payload.serverSentAt || payload.sentAt || now;
+      const delay = Math.max(0, (serverNow - sentAt) / 1000);
+
+      if (shouldPlay && !isPlayingRef.current) {
+        play();
+        // If it was a play command, seek forward slightly to match host
+        if (delay > 0.1) {
+           const currentTime = getCurrentTimeSeconds();
+           seekToSeconds(currentTime + delay + 0.1);
+        }
+      }
       if (!shouldPlay && isPlayingRef.current) pause();
       isPlayingRef.current = shouldPlay;
       return;
@@ -186,15 +209,25 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       }
       
       const now = Date.now();
-      const networkDelay = payload.sentAt ? Math.max(0, (now - payload.sentAt) / 1000) : 0;
+      const serverNow = now + (payload.clockOffset || 0);
+      const sentAt = payload.serverSentAt || payload.sentAt || now;
+      
+      // Calculate how long ago the message was sent according to the server's clock
+      const delayInSeconds = Math.max(0, (serverNow - sentAt) / 1000);
+      
       const rawTime = Number(payload.currentTime || 0);
       const shouldPlay = Boolean(payload.isPlaying);
-      const targetTime = shouldPlay ? rawTime + networkDelay : rawTime;
+      
+      // targetTime = time at host + transport delay
+      const targetTime = shouldPlay ? rawTime + delayInSeconds : rawTime;
 
       const seekWithGuard = (time) => {
         const localTime = Number(getCurrentTimeSeconds() || 0);
-        // Reduced threshold to 0.1s for tighter sync
-        if (Math.abs(time - localTime) > 0.1) seekToSeconds(time + 0.06);
+        // Only seek if drift is > 0.3s (slightly more relaxed to avoid constant jumping)
+        // Adjust with a small 0.05s buffer for processing delay
+        if (Math.abs(time - localTime) > 0.3) {
+          seekToSeconds(time + 0.05);
+        }
       };
 
       if (payload.trackId) {

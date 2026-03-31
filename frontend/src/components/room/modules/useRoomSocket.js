@@ -15,6 +15,8 @@ export const useRoomSocket = ({
   roomHostId
 }) => {
   const wsRef = useRef(null);
+  const clockOffsetRef = useRef(0); // ServerTime - LocalTime
+  const rttRef = useRef(0);
 
   const sendRoomEvent = useCallback((payload) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
@@ -45,7 +47,11 @@ export const useRoomSocket = ({
     const ws = new WebSocket(roomWsUrl);
     wsRef.current = ws;
 
-    ws.onopen = () => console.log("WS Connected:", roomName);
+    ws.onopen = () => {
+      console.log("WS Connected:", roomName);
+      // Perform initial clock sync
+      ws.send(JSON.stringify({ type: "ping", clientTime: Date.now() }));
+    };
     ws.onmessage = (msg) => {
       let payload = null;
       try {
@@ -55,7 +61,23 @@ export const useRoomSocket = ({
       }
       if (!payload || payload.roomName !== roomName) return;
       if (payload.senderId === clientId) return;
-      onMessage(payload);
+
+      // Handle clock sync pong
+      if (payload.type === "pong") {
+        const now = Date.now();
+        const rtt = now - payload.clientTime;
+        const offset = payload.serverTime - (payload.clientTime + rtt / 2);
+        
+        rttRef.current = rtt;
+        clockOffsetRef.current = offset;
+        // console.log(`Clock Synced. RTT: ${rtt}ms, Offset: ${offset}ms`);
+        return;
+      }
+
+      onMessage({
+        ...payload,
+        clockOffset: clockOffsetRef.current
+      });
     };
     ws.onclose = () => console.log("WS Closed");
     ws.onerror = (err) => console.error("Room WS Error:", err);
@@ -70,9 +92,9 @@ export const useRoomSocket = ({
   useEffect(() => {
     if (!isHost || !activeTrackId) return;
     const heartbeatId = setInterval(() => {
-      // console.log("Broadcasting Sync State:", roomName);
+      // Reduced frequency to 2000ms to avoid jitter and overhead
       broadcastSyncState();
-    }, 350);
+    }, 2000);
     return () => clearInterval(heartbeatId);
   }, [isHost, activeTrackId, broadcastSyncState]);
 

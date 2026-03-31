@@ -48,8 +48,33 @@ function startWebSocketServer(server) {
     broadcastActiveUsers();
 
     socket.on("message", (msg) => {
+      let data = {};
+      try {
+        data = JSON.parse(msg.toString());
+      } catch (e) {
+        return;
+      }
+
+      // Handle Ping for RTT calculation
+      if (data.type === "ping") {
+        socket.send(JSON.stringify({
+          type: "pong",
+          clientTime: data.clientTime,
+          serverTime: Date.now()
+        }));
+        return;
+      }
+
+      // Add authoritative server timestamp
+      const timestampedMsg = JSON.stringify({
+        ...data,
+        serverSentAt: Date.now()
+      });
+
       clientsSet.forEach((c) => {
-        if (c.readyState === 1) c.send(msg.toString());
+        if (c.readyState === 1 && c !== socket) {
+          c.send(timestampedMsg);
+        }
       });
     });
 
