@@ -14,6 +14,7 @@ import { addUser } from "../utils/UserSlice";
 
 
 import { API_BASE } from "../../api/config";
+import { saveToken } from "../../api/auth";
 const AUTH_API_BASE = API_BASE + "/api/auth";
 
 function extractUser(payload) {
@@ -47,6 +48,8 @@ export default function Login() {
 
       const user = extractUser(req.data);
       if (!user) throw new Error("Invalid login response");
+
+      if (req.data.token) saveToken(req.data.token);
 
       dispatch(addUser(user));
       navigate("/home");

@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 const { startWebSocketServer } = require("./webSocket/chats");
 const YTMusic = require("ytmusic-api");
@@ -23,8 +22,6 @@ const allowedOrigins = [
   "https://onemusic-eta.vercel.app",
   ...envOrigins
 ];
-
-app.set("trust proxy", 1);
 
 app.use(
   cors({
@@ -56,12 +53,11 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
-app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.status(200).json({

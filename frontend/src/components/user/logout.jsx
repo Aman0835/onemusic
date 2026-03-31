@@ -8,6 +8,7 @@ import Button from "../Login/Button";
 import { removeUser } from "../utils/UserSlice";
 
 import { API_BASE } from "../../api/config";
+import { removeToken } from "../../api/auth";
 const AUTH_API_BASE = API_BASE + "/api/auth";
 
 const Logout = ({ iconOnly }) => {
@@ -20,8 +21,8 @@ const Logout = ({ iconOnly }) => {
       await axios.post(
         AUTH_API_BASE + "/logout",
         {},
-        { withCredentials: true },
       );
+      removeToken();
       dispatch(removeUser());
       navigate("/home");
     } catch (e) {

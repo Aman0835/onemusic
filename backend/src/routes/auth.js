@@ -4,11 +4,9 @@ const User = require("../modules/user");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validateSingupData } = require("../helpers/validation");
-const { getCookieOptions } = require("../helpers/cookieOptions");
 
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
-// Helper removed - now imported from cookieOptions.js
 function serializeUser(user) {
   return {
     id: user._id,
@@ -43,9 +41,10 @@ async function signupHandler(req, res) {
     await user.save();
     const token = await user.getJWT();
 
-    res.cookie("token", token, getCookieOptions());
+    // Return token in response body — client stores in localStorage
     res.status(201).json({
       message: "User created successfully",
+      token,
       user: serializeUser(user),
     });
   } catch (err) {
@@ -61,32 +60,36 @@ authRouter.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error(" Invalid credentials");
+      throw new Error("Invalid credentials");
     }
 
     const isPasswordMatch = await user.validatePassword(password);
 
     if (isPasswordMatch) {
       const token = await user.getJWT();
-      res.cookie("token", token, getCookieOptions());
+      // Return token in response body — client stores in localStorage
       res.status(200).json({
         message: "login successful",
+        token,
         user: serializeUser(user),
       });
     } else {
-      throw new Error(" Invalid credentials");
+      throw new Error("Invalid credentials");
     }
   } catch (err) {
     res.status(400).json({ error: "Something went wrong: " + err.message });
   }
 });
 
+// /me reads from Authorization: Bearer <token> header
 authRouter.get("/me", async (req, res) => {
   try {
-    const token = req.cookies?.token;
-    console.log("Session Check [/me]: Origin:", req.get('origin'), "| Cookies received:", !!token);
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
+
     if (!token) {
-      console.log("Full Cookie Header:", req.headers.cookie);
       return res.status(401).json({ error: "Not logged in" });
     }
 
@@ -104,12 +107,8 @@ authRouter.get("/me", async (req, res) => {
 });
 
 authRouter.post("/logout", async (req, res) => {
-  res.cookie("token", null, {
-    ...getCookieOptions(),
-    expires: new Date(0),
-  });
+  // With Bearer tokens, logout is handled on the client side (remove from localStorage)
   res.json({ message: "Logout successful" });
 });
 
 module.exports = { authRouter };
-

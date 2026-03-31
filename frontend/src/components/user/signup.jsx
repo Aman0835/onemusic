@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { addUser } from "../utils/UserSlice";
 import { API_BASE } from "../../api/config";
+import { saveToken } from "../../api/auth";
 
 const AUTH_API_BASE = API_BASE + "/api/auth";
 
@@ -55,13 +56,13 @@ export default function Signup() {
       const res = await fetch(`${AUTH_API_BASE}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(form),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || data.error || "Signup failed");
       
+      if (data.token) saveToken(data.token);
       const user = data.user || data;
       
       if (user) {

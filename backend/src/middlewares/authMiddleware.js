@@ -1,3 +1,7 @@
+/**
+ * Auth Middleware - reads JWT from Authorization: Bearer <token> header.
+ * Cookies are no longer used.
+ */
 const jwt = require("jsonwebtoken");
 const User = require("../modules/user");
 
@@ -5,17 +9,18 @@ const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.cookies?.token;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.startsWith("Bearer ")
+      ? authHeader.slice(7)
+      : null;
+
     if (!token) {
-      console.log("Auth Error: Missing token cookie. Origin:", req.get('origin'));
-      console.log("Cookie Header:", req.headers.cookie);
       return res.status(401).json({ error: "Not logged in" });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET);
     const userId = decoded?.id || decoded?._id;
     if (!userId) {
-      console.log("Auth Error: Invalid payload in token", decoded);
       return res.status(401).json({ error: "Invalid token" });
     }
 

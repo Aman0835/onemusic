@@ -20,6 +20,7 @@ import Login from "./components/user/login.jsx";
 import Signup from "./components/user/signup.jsx";
 import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import { API_BASE } from "./api/config";
+import { getToken, authHeaders } from "./api/auth";
 
 import AuthCallback from "./auth/AuthCallback.jsx";
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
@@ -74,8 +75,13 @@ const AppContent = () => {
     if (hasBootSessionCheckRun) return;
     hasBootSessionCheckRun = true;
 
+    if (!getToken()) {
+      dispatch(removeUser());
+      return;
+    }
+
     axios
-      .get(authApiBase + "/me", { withCredentials: true })
+      .get(authApiBase + "/me", { headers: authHeaders() })
       .then((res) => {
         const user = res?.data?.user;
         if (user) dispatch(addUser(user));
