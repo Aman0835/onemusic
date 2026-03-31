@@ -48,7 +48,7 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
   const roomHostIdRef = useRef(null);
   const activeTrackIdRef = useRef(null);
   const isPlayingRef = useRef(false);
-  const lastPausedSeekAtRef = useRef(0);
+  const lastAutoSyncAtRef = useRef(0);
   const clientIdRef = useRef(
     localStorage.getItem("one_music_room_client_id") ||
       `client_${Math.random().toString(36).slice(2, 10)}`,
@@ -226,11 +226,19 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
       const targetTime = shouldPlay ? rawTime + delayInSeconds : rawTime;
 
       const seekWithGuard = (time) => {
+        const now = Date.now();
+        // Cooldown: Don't auto-seek more than once every 5 seconds to prevent "lagging" stutter
+        if (now - lastAutoSyncAtRef.current < 5000) return;
+
         const localTime = Number(getCurrentTimeSeconds() || 0);
-        // Only seek if drift is > 0.3s (slightly more relaxed to avoid constant jumping)
-        // Adjust with a small 0.05s buffer for processing delay
-        if (Math.abs(time - localTime) > 0.3) {
-          seekToSeconds(time + 0.05);
+        const isMobile = window.innerWidth < 768;
+        // Relax threshold for mobile (1.2s) vs desktop (0.4s) to prevent jitter
+        const threshold = isMobile ? 1.2 : 0.4;
+        
+        if (Math.abs(time - localTime) > threshold) {
+          console.log(`[Sync] Drift detected: ${Math.abs(time - localTime).toFixed(2)}s. Seeking...`);
+          seekToSeconds(time + (isMobile ? 0.15 : 0.05));
+          lastAutoSyncAtRef.current = now;
         }
       };
 
