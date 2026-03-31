@@ -22,6 +22,7 @@ import {
   getRoomDetailsAPI,
   castVoteAPI,
 } from "../../api/room";
+import { API_BASE, WS_BASE } from "../../api/config";
 import { usePlayer } from "../../context/PlayerContext";
 import Chat from "../chats/chat";
 import PlayerBar from "../PlayerBar";
@@ -31,8 +32,8 @@ import RoomTrackItem from "./modules/RoomTrackItem";
 import { useRoomSocket } from "./modules/useRoomSocket";
 import ShareRoomModal from "./modules/ShareRoomModal";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
-const ROOM_WS_BASE = API_BASE.replace(/^http/, "ws");
+const ROOM_API_BASE = API_BASE + "/api/rooms";
+const ROOM_WS_BASE = WS_BASE;
 
 const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
   const { roomName: paramRoomName } = useParams();
@@ -52,7 +53,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
   );
   const user = useSelector((state) => state.user);
   const userId = user?.id || user?._id;
-  const roomWsUrl = `${ROOM_WS_BASE}/room/${encodeURIComponent(roomName)}${userId ? `?userId=${userId}` : ""}`;
+  const roomWsUrl = `${ROOM_WS_BASE}/room/${encodeURIComponent(roomName)}?userId=${clientIdRef.current}`;
 
   const {
     setQueueAndPlay,

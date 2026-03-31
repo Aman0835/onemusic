@@ -8,25 +8,15 @@ const { validateSingupData } = require("../helpers/validation");
 const JWT_SECRET = (process.env.JWT_SECRET || "secretkey").trim();
 
 function getCookieOptions() {
-  const isProduction = process.env.NODE_ENV === "production" || !!process.env.RAILWAY_STATIC_URL || !!process.env.RENDER;
+  const isProduction = process.env.NODE_ENV === "production";
   
-  const options = {
+  return {
     httpOnly: true,
     path: "/",
-    expires: new Date(Date.now() + 8 * 3600000),
+    expires: new Date(Date.now() + 7 * 24 * 3600000), // 7 days
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
   };
-
-  if (isProduction) {
-    options.secure = true;
-    options.sameSite = "None";
-    // For Render: do not set domain, let browser handle it from response origin
-    // For explicit domain control: options.domain = ".onrender.com"; or ".up.railway.app"
-  } else {
-    options.secure = false;
-    options.sameSite = "Lax";
-  }
-
-  return options;
 }
 function serializeUser(user) {
   return {

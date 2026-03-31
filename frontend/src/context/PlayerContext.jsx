@@ -1,6 +1,22 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, memo } from "react";
 
 const PlayerContext = createContext();
+
+const YouTubePlayerContainer = memo(() => (
+  <div
+    style={{
+      position: "fixed",
+      top: "-9999px",
+      left: "-9999px",
+      width: "1px",
+      height: "1px",
+      opacity: 0.01,
+      pointerEvents: "none",
+    }}
+  >
+    <div id="yt-player"></div>
+  </div>
+));
 
 export const PlayerProvider = ({ children }) => {
   const playerRef = useRef(null);
@@ -417,18 +433,7 @@ export const PlayerProvider = ({ children }) => {
         enterRoomMode,
         exitRoomMode,
       }}>
-      <div
-        style={{
-          position: "fixed",
-          top: "-9999px",
-          left: "-9999px",
-          width: "1px",
-          height: "1px",
-          opacity: 0.01,
-          pointerEvents: "none",
-        }}
-        dangerouslySetInnerHTML={{ __html: '<div id="yt-player"></div>' }}
-      />
+      <YouTubePlayerContainer />
       {children}
     </PlayerContext.Provider>
   );

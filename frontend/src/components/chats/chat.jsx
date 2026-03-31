@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { API_BASE, WS_BASE } from "../../api/config";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
-const CHAT_WS_BASE = API_BASE.replace(/^http/, "ws");
+const WS_URL = WS_BASE;
 
 const Chat = ({ roomName }) => {
   const [messages, setMessages] = useState([]);
@@ -14,7 +14,7 @@ const Chat = ({ roomName }) => {
 
   // ------------------ CONNECT WS ------------------
   const connectWS = () => {
-    const ws = new WebSocket(`${CHAT_WS_BASE}/ws/chat`);
+    const ws = new WebSocket(`${WS_URL}/ws/chat`);
     wsRef.current = ws;
 
     ws.onopen = () => {

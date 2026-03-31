@@ -1,9 +1,10 @@
-const API_BASE =
-  (import.meta.env.VITE_API_BASE || "http://localhost:5000") + "/api/data";
+import { API_BASE } from "./config";
+const DATA_API_BASE = API_BASE + "/api/data";
 
 async function getJson(path, options = {}) {
   try {
-    const res = await fetch(`${API_BASE}/${path}`, {
+    const url = `${DATA_API_BASE}/${path}`;
+    const res = await fetch(url, {
       headers: {
         "Content-Type": "application/json",
       },

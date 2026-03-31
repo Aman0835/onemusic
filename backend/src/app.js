@@ -19,32 +19,44 @@ const envOrigins = (process.env.CLIENT_ORIGIN || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = new Set([
-  ...envOrigins,
-  "https://onemusic-eta.vercel.app"
-]);
+const allowedOrigins = [
+  "https://onemusic-eta.vercel.app",
+  ...envOrigins
+];
 
 app.set("trust proxy", 1);
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
-      
-      // Allow exact matches from allowedOrigins
-      if (allowedOrigins.has(origin)) {
+
+      // Allow all in development
+      if (process.env.NODE_ENV !== "production") {
         return callback(null, true);
       }
 
-      // Allow any Vercel preview URL (ends with .vercel.app)
-      if (origin.endsWith(".vercel.app")) {
-        return callback(null, true);
-      }
+      const isAllowed = allowedOrigins.some((allowed) => {
+        if (allowed === origin) return true;
+        if (allowed.includes("*")) {
+          const regex = new RegExp("^" + allowed.replace(/\*/g, ".*") + "$");
+          return regex.test(origin);
+        }
+        return false;
+      });
 
-      console.log("CORS Rejected for origin:", origin);
-      callback(null, false);
+      // Special case for Vercel preview deployments
+      if (isAllowed || origin.endsWith(".vercel.app")) {
+        callback(null, true);
+      } else {
+        console.log("CORS Rejected for origin:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   })
 );
 

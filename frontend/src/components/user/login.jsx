@@ -12,7 +12,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { addUser } from "../utils/UserSlice";
 
 
-  const AUTH_API_BASE = `${import.meta.env.VITE_API_BASE}/api/auth`;
+import { API_BASE } from "../../api/config";
+const AUTH_API_BASE = API_BASE + "/api/auth";
 
 function extractUser(payload) {
   return payload?.user || payload || null;
@@ -49,7 +50,8 @@ export default function Login() {
       dispatch(addUser(user));
       navigate("/home");
     } catch (error) {
-      setError(error?.response?.data || error?.message || "Something went wrong");
+      const errorMsg = error?.response?.data?.error || error?.response?.data?.message || error?.message || "Something went wrong";
+      setError(errorMsg);
       console.error(error);
     } finally {
       setLoading(false);

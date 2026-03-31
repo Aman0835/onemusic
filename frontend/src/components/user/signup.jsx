@@ -11,10 +11,9 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { addUser } from "../utils/UserSlice";
+import { API_BASE } from "../../api/config";
 
-const AUTH_API_BASE =
-  import.meta.env.VITE_API_BASE_URL ||
-  `${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/api/auth`;
+const AUTH_API_BASE = API_BASE + "/api/auth";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -73,7 +72,7 @@ export default function Signup() {
         setTimeout(() => navigate("/login"), 1500);
       }
     } catch (err) {
-      setMessage(err.message);
+      setMessage(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }

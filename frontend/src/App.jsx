@@ -18,6 +18,7 @@ import ListeningRoom from "./components/room/listeningRoom.jsx";
 import RoomLobby from "./components/room/roomLobby.jsx";
 import Login from "./components/user/login.jsx";
 import Signup from "./components/user/signup.jsx";
+import { API_BASE } from "./api/config";
 
 import AuthCallback from "./auth/AuthCallback.jsx";
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
@@ -54,9 +55,8 @@ const AppContent = () => {
 
   const location = useLocation();
   const dispatch = useDispatch();
-  const authApiBase =
-    import.meta.env.VITE_API_BASE_URL ||
-    `${import.meta.env.VITE_API_BASE || "http://localhost:5000"}/api/auth`;
+  const authApiBase = API_BASE + "/api/auth";
+  const userApiBase = API_BASE + "/api/user";
 
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/signup";
