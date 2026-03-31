@@ -81,14 +81,14 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <main className="w-full h-[calc(100vh-100px)] flex items-center justify-center p-4 sm:p-6 bg-transparent">
+      <div className="w-full h-[60dvh] flex items-center justify-center p-4 sm:p-6 bg-transparent">
         <Loader />
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="w-full h-full overflow-y-auto scrollbar-hide p-4 sm:p-6 pb-8">
+    <div className="w-full p-4 sm:p-6 pb-8">
       <SearchBar
         showPlusIcon={false}
         onResultsChange={setSearchResults}
@@ -176,7 +176,7 @@ const Home = () => {
           />
         </div>
       )}
-    </main>
+    </div>
   );
 };
 

@@ -92,7 +92,7 @@ const AppContent = () => {
   }, [authApiBase, dispatch, isAuthPage]);
 
   return (
-    <div className="flex flex-col h-screen w-full bg-black text-white font-sans overflow-hidden bg-gradient-to-br from-indigo-900/60 via-black to-black animate-gradient-xy">
+    <div className="flex flex-col h-[100dvh] w-full bg-black text-white font-sans overflow-hidden bg-gradient-to-br from-indigo-900/60 via-black to-black animate-gradient-xy">
       
       {/* Top Section: Sidebar + Content */}
       <div className="flex-1 flex overflow-hidden min-h-0 relative">
@@ -134,7 +134,7 @@ const AppContent = () => {
             </div>
           )}
 
-          <main className="flex-1 overflow-y-auto scrollbar-hide">
+          <main className="flex-1 overflow-y-auto scrollbar-hide pb-24 sm:pb-32">
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />

@@ -119,20 +119,20 @@ export default function LibraryPage() {
 
   if (isLoading)
     return (
-      <main className="w-full h-screen flex items-center justify-center">
+      <div className="w-full h-[60dvh] flex items-center justify-center">
         <Loader />
-      </main>
+      </div>
     );
 
   if (error)
     return (
-      <main className="w-full h-screen flex items-center justify-center text-white">
+      <div className="w-full h-[60dvh] flex items-center justify-center text-white">
         <p className="text-red-500 font-semibold">{error}</p>
-      </main>
+      </div>
     );
 
   return (
-    <div className="text-white h-full overflow-hidden p-4 sm:p-6 font-sans flex flex-col pb-8">
+    <div className="text-white p-4 sm:p-6 font-sans flex flex-col pb-8">
       <Header onToggleSearch={() => setShowSearch((v) => !v)} />
 
       <div className="mt-6">
@@ -151,7 +151,7 @@ export default function LibraryPage() {
         </div>
       )}
 
-      <div className="mt-8 flex-1 min-h-0 overflow-y-auto scrollbar-hide pr-1">
+      <div className="mt-8 flex-1">
         <div>
           <div className="flex justify-end items-center mb-4">
             <button

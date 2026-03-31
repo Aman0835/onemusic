@@ -19,30 +19,30 @@ export default function ArtistPage() {
       } catch (e) {
         console.error("Failed to fetch artist data", e);
       } finally {
-        setIsLoading(false);   // <-- FIX
+        setIsLoading(false);
       }
     })();
   }, []);
 
   if (isLoading) {
     return (
-      <main className="w-full h-full flex items-center justify-center">
+      <div className="w-full h-[60dvh] flex items-center justify-center">
         <Loader />
-      </main>
+      </div>
     );
   }
 
   // Prevent crashes if artist = null
   if (!artist) {
     return (
-      <main className="w-full h-screen flex items-center justify-center text-white">
+      <div className="w-full h-[60dvh] flex items-center justify-center text-white">
         <p>Failed to load artist info.</p>
-      </main>
+      </div>
     );
   }
 
   return (
-    <div className="h-full w-full overflow-y-auto scrollbar-hide pb-12">
+    <div className="w-full pb-12">
       {/* HERO */}
       <div className="relative h-[40vh] sm:h-[50vh] text-white">
         <div
