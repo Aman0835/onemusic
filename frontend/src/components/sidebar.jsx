@@ -1,25 +1,43 @@
-import { Headset } from "lucide-react";
+import { Headset, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import "../index.css";
 import Button from "./Login/Button";
 import ProfileCard from "./cards/profileCard";
+import { useSidebar } from "../context/SidebarContext";
 
-export default function Sidebar({ children }) {
+export default function Sidebar({ children, isOpen, onClose }) {
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
    
 
   return (
-    <aside className="h-full w-16 md:w-60">
-      <nav className="relative h-full flex flex-col shadow-xl rounded-br-3xl rounded-tr-3xl bg-black/20 backdrop-blur-md border border-white/20 text-white w-16 md:w-60 transition-all duration-300">
+    <aside 
+      className={`
+        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out
+        md:relative md:translate-x-0
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      `}
+    >
+      <nav className="relative h-full flex flex-col shadow-xl rounded-r-3xl bg-black/90 md:bg-black/20 backdrop-blur-md border-r border-y border-white/20 text-white w-full">
+        {/* Mobile Close Button */}
+        <button 
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white md:hidden hover:bg-white/10 rounded-full transition-colors"
+        >
+          <X size={20} />
+        </button>
+
         <div
-          className="p-3 md:p-4 pb-2 flex items-center justify-center cursor-pointer group"
-          onClick={() => navigate("/home")}>
-          <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(4,167,46,0.3)] transition-transform group-hover:scale-110">
+          className="p-4 flex items-center justify-center cursor-pointer group mt-2 md:mt-0"
+          onClick={() => {
+            navigate("/home");
+            onClose && onClose();
+          }}>
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden shadow-[0_0_15px_rgba(4,167,46,0.3)] transition-transform group-hover:scale-110">
             <img src="/logo.png" alt="OneMusic Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="hidden md:block font-bold text-2xl p-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+          <h1 className="font-bold text-2xl p-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
             One Music
           </h1>
         </div>
@@ -42,9 +60,12 @@ export default function Sidebar({ children }) {
 }
 
 export function SidebarItem({ icon, text, to }) {
+  const { closeSidebar } = useSidebar();
+
   return (
     <NavLink
       to={to}
+      onClick={closeSidebar}
       className={({ isActive }) =>
         `relative flex items-center py-2 px-3 my-1
          rounded-md font-medium cursor-pointer justify-center md:justify-start
@@ -55,7 +76,7 @@ export function SidebarItem({ icon, text, to }) {
           }`
       }>
       {icon}
-      <span className="overflow-hidden transition-all w-0 md:w-full md:ml-3">
+      <span className="ml-3 font-semibold">
         {text}
       </span>
     </NavLink>

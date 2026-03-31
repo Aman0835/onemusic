@@ -45,7 +45,7 @@ const Home = () => {
     return (
       <div
         onClick={() => onSelect(item)}
-        className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2"
+        className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2 w-full"
       >
         <div className="relative w-full aspect-square overflow-hidden rounded-md shadow-lg">
           <img
@@ -64,22 +64,16 @@ const Home = () => {
   }
 
   function Cards({ items = [], onSelect }) {
-    const { ref, isDragging } = useScrollGrab();
-
     return (
       <div 
-        ref={ref}
-        className="flex overflow-x-auto scrollbar-hide gap-4 sm:gap-5 pb-4 cursor-grab active:cursor-grabbing touch-pan-x"
+        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-5 pb-4"
       >
         {items.map((item) => (
-          <div key={item.id} className="min-w-[120px] sm:min-w-[140px] max-w-[160px]">
-            <AlbumCard 
-              item={item} 
-              onSelect={(i) => {
-                if (!isDragging) onSelect(i);
-              }} 
-            />
-          </div>
+          <AlbumCard 
+            key={item.id}
+            item={item} 
+            onSelect={(i) => onSelect(i)} 
+          />
         ))}
       </div>
     );

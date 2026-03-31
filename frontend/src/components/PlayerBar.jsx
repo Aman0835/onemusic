@@ -65,9 +65,9 @@ const PlayerBar = ({
               className="w-10 h-10 md:w-14 md:h-14 rounded-md object-cover shadow-md"
             />
 
-            <div className="hidden sm:flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-white font-semibold truncate max-w-[140px] md:max-w-[200px]">
+                <p className="text-white font-semibold truncate max-w-[100px] sm:max-w-[140px] md:max-w-[200px]">
                   {activeTrack.title}
                 </p>
                 {isRoomMode && (
@@ -76,7 +76,7 @@ const PlayerBar = ({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 truncate max-w-[160px] md:max-w-[220px]">
+              <p className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-[160px] md:max-w-[220px]">
                 {activeTrack.subtitle || "Unknown Artist"}
               </p>
             </div>
@@ -176,33 +176,68 @@ const PlayerBar = ({
       </div>
 
       <div className="flex justify-end items-center gap-2 md:gap-4">
-        {/* Mute / Unmute Button */}
-        <button
-          onClick={toggleMute}
-          className="p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition">
-          {volume === 0 ? (
-            <VolumeX className="text-red-400" />
-          ) : (
-            <Volume2 className="text-green-400" />
-          )}
-        </button>
+        {/* Mobile: Vertical Popup Slider */}
+        <div className="relative group md:hidden flex items-center justify-center">
+          <button
+            onClick={toggleMute}
+            className="p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition active:scale-95"
+          >
+            {volume === 0 ? (
+              <VolumeX className="text-red-400" size={20} />
+            ) : (
+              <Volume2 className="text-green-400" size={20} />
+            )}
+          </button>
 
-        {/* Themed Volume Slider */}
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={volume}
-          onChange={(e) => {
-            const v = Number(e.target.value);
-            setVolumeLocal(v);
-            onVolumeChange?.(v);
-          }}
-          className="hidden md:block w-28 h-1 appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
-          style={{
-            background: `linear-gradient(to right, #04A72E ${volume}%, rgba(255,255,255,0.2) ${volume}%)`,
-          }}
-        />
+          {/* Vertical Volume Slider Popup */}
+          <div className="absolute bottom-[120%] right-0 w-10 h-32 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                setVolumeLocal(v);
+                onVolumeChange?.(v);
+              }}
+              className="w-24 h-1 absolute appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
+              style={{
+                transform: "rotate(-90deg)",
+                background: `linear-gradient(to right, #04A72E ${volume}%, rgba(255,255,255,0.2) ${volume}%)`,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Desktop: Horizontal Slider */}
+        <div className="hidden md:flex items-center justify-center gap-2">
+          <button
+            onClick={toggleMute}
+            className="p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition active:scale-95"
+          >
+            {volume === 0 ? (
+              <VolumeX className="text-red-400" size={20} />
+            ) : (
+              <Volume2 className="text-green-400" size={20} />
+            )}
+          </button>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVolumeLocal(v);
+              onVolumeChange?.(v);
+            }}
+            className="w-28 h-1 appearance-none cursor-pointer bg-white/10 rounded-full accent-[#04A72E]"
+            style={{
+              background: `linear-gradient(to right, #04A72E ${volume}%, rgba(255,255,255,0.2) ${volume}%)`,
+            }}
+          />
+        </div>
       </div>
       </div>
       {toast && (

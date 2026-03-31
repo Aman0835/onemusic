@@ -18,6 +18,7 @@ import ListeningRoom from "./components/room/listeningRoom.jsx";
 import RoomLobby from "./components/room/roomLobby.jsx";
 import Login from "./components/user/login.jsx";
 import Signup from "./components/user/signup.jsx";
+import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import { API_BASE } from "./api/config";
 
 import AuthCallback from "./auth/AuthCallback.jsx";
@@ -31,6 +32,7 @@ import {
     Library as LibraryIcon,
     MicVocal,
     Plus,
+    Menu
 } from "lucide-react";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -63,6 +65,8 @@ const AppContent = () => {
   const isRoomPage = location.pathname.startsWith("/room/") && location.pathname !== "/room";
   const hideSidebar = isAuthPage || isRoomPage;
 
+  const { isOpen: isSidebarOpen, toggleSidebar, closeSidebar } = useSidebar();
+
   useEffect(() => {
     if (!authApiBase || isAuthPage) return;
 
@@ -85,23 +89,46 @@ const AppContent = () => {
     <div className="flex flex-col h-screen w-full bg-black text-white font-sans overflow-hidden bg-gradient-to-br from-indigo-900/60 via-black to-black animate-gradient-xy">
       
       {/* Top Section: Sidebar + Content */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex-1 flex overflow-hidden min-h-0 relative">
         {!hideSidebar && (
-          <Sidebar>
-            <SidebarItem icon={<HouseIcon size={20} />} text="Home" to="/home" />
-            <SidebarItem
-              icon={<LibraryIcon size={20} />}
-              text="Library"
-              to="/library"
-            />
-            <SidebarItem icon={<MicVocal size={20} />} text="Artist" to="/artist" />
-            <SidebarItem icon={<AlbumIcon size={20} />} text="Album" to="/album" />
-            <SidebarItem icon={<Plus size={20} />} text="Room" to="/room" />
-          </Sidebar>
+          <>
+            {/* Mobile Overlay */}
+            {isSidebarOpen && (
+              <div 
+                className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+                onClick={closeSidebar}
+              />
+            )}
+            
+            <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar}>
+              <SidebarItem icon={<HouseIcon size={20} />} text="Home" to="/home" />
+              <SidebarItem
+                icon={<LibraryIcon size={20} />}
+                text="Library"
+                to="/library"
+              />
+              <SidebarItem icon={<MicVocal size={20} />} text="Artist" to="/artist" />
+              <SidebarItem icon={<AlbumIcon size={20} />} text="Album" to="/album" />
+              <SidebarItem icon={<Plus size={20} />} text="Room" to="/room" />
+            </Sidebar>
+          </>
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 h-full min-w-0 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile Header (Hamburger) */}
+          {!hideSidebar && (
+            <div className="md:hidden flex items-center p-4">
+              <button 
+                onClick={toggleSidebar}
+                className="p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95"
+              >
+                <Menu size={24} />
+              </button>
+            </div>
+          )}
+
+          <main className="flex-1 overflow-y-auto scrollbar-hide">
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
@@ -115,7 +142,8 @@ const AppContent = () => {
             <Route path="/room/:roomName" element={<ListeningRoom />} />
             <Route path="/Home" element={<Navigate to="/home" replace />} />
           </Routes>
-        </main>
+          </main>
+        </div>
       </div>
 
       {/* Bottom Section: PlayerBar */}
@@ -144,7 +172,9 @@ const App = () => {
   return (
     <Router>
       <PlayerProvider>
-        <AppContent />
+        <SidebarProvider>
+          <AppContent />
+        </SidebarProvider>
       </PlayerProvider>
     </Router>
   );

@@ -15,6 +15,17 @@ const RoomSidebar = ({
   handleExit,
   onShare,
 }) => {
+  // Always include self in the listeners list even if the API doesn't
+  const displayListeners = React.useMemo(() => {
+    if (!userId) return roomListeners;
+    const alreadyInList = roomListeners.some(
+      (l) => String(l._id) === String(userId)
+    );
+    if (alreadyInList) return roomListeners;
+    // Inject a minimal host entry so the host sees themselves
+    const selfEntry = { _id: userId, firstName: "You", isHostPlaceholder: true };
+    return [selfEntry, ...roomListeners];
+  }, [roomListeners, userId]);
   return (
     <aside className={`
       fixed inset-0 z-50 bg-[#0a0a0a] transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 md:w-64 md:border-r md:border-white/5 md:bg-transparent
@@ -46,10 +57,10 @@ const RoomSidebar = ({
               <Users size={12} /> Listeners
             </h3>
             <div className="flex flex-col gap-3">
-              {roomListeners.length === 0 ? (
+              {displayListeners.length === 0 ? (
                 <p className="text-zinc-500 text-xs italic">No listeners yet.</p>
               ) : (
-                [...roomListeners].sort((a, b) => {
+                [...displayListeners].sort((a, b) => {
                   const isHostA = String(a._id) === String(roomHostId);
                   const isHostB = String(b._id) === String(roomHostId);
                   if (isHostA) return -1;
@@ -60,7 +71,7 @@ const RoomSidebar = ({
                   if (!isOnlineA && isOnlineB) return 1;
                   return 0;
                 }).map((listener) => {
-                  const isOnline = activeUserIds.includes(String(listener._id));
+                  const isOnline = activeUserIds.includes(String(listener._id)) || listener.isHostPlaceholder;
                   const isHost = String(listener._id) === String(roomHostId);
                   const isMe = String(listener._id) === String(userId);
                   
@@ -78,7 +89,7 @@ const RoomSidebar = ({
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <img 
-                            src={listener.photoUrl || `https://ui-avatars.com/api/?name=${listener.firstName}+${listener.lastName}&background=random`} 
+                            src={listener.photoUrl || `https://ui-avatars.com/api/?name=${listener.firstName || 'U'}&background=random`} 
                             alt={listener.firstName} 
                             className={`w-8 h-8 rounded-full object-cover border-2 transition-transform duration-300 group-hover:scale-110 ${isOnline ? 'border-[#04A72E]' : 'border-zinc-700'}`}
                           />
