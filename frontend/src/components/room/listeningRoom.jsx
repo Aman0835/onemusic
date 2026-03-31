@@ -582,7 +582,7 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
 
       {/* Desktop Chat (Sidebar) */}
       <aside className="hidden lg:block w-80 h-full border-l border-white/5 bg-[#050505]">
-         <Chat roomName={roomName} />
+         <Chat roomName={roomNameDisplay} />
       </aside>
 
       {/* Mobile Chat Slider */}
