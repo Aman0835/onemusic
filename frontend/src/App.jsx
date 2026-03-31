@@ -135,7 +135,7 @@ const AppContent = () => {
             </div>
           )}
 
-          <main className="flex-1 overflow-y-auto scrollbar-hide pb-24 sm:pb-32">
+          <main className={`flex-1 overflow-y-auto scrollbar-hide ${!hideSidebar ? "pb-24 sm:pb-32" : ""}`}>
           <Routes>
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />

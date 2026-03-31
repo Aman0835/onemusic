@@ -73,6 +73,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
     getCurrentTimeSeconds,
     enterRoomMode,
     exitRoomMode,
+    setRoomTrack,
   } = usePlayer();
 
   const [playlist, setPlaylist] = useState([]);
@@ -161,6 +162,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       setPlaylist(syncedQueue);
       const index = syncedQueue.findIndex((track) => track.id === payload.trackId);
       if (index !== -1) {
+        setRoomTrack(syncedQueue[index]);
         setQueueAndPlay(syncedQueue, index);
         // Compensate for message travel time if starting a new track
         if (delay > 0.1) {
@@ -234,6 +236,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
         if (activeTrackIdRef.current !== payload.trackId) {
           const idx = syncQueue.findIndex((t) => t.id === payload.trackId);
           if (idx !== -1) {
+            setRoomTrack(syncQueue[idx]);
             setQueueAndPlay(syncQueue, idx);
             setTimeout(() => seekWithGuard(targetTime), 700);
           }
@@ -294,7 +297,10 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       return;
     }
     const index = selectedQueue.findIndex((t) => t.id === id);
-    if (index !== -1) setQueueAndPlay(selectedQueue, index);
+    if (index !== -1) {
+      setRoomTrack(selectedQueue[index]);
+      setQueueAndPlay(selectedQueue, index);
+    }
     if (shouldSync) {
       sendRoomEvent({ type: "track_select", trackId: id, queue: selectedQueue });
       if (isRoomHost) {
@@ -325,7 +331,10 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
       sendRoomEvent({ type: "queue_replace", queue: updatedRoom.queue });
 
       const index = updatedRoom.queue.findIndex((t) => t.id === track.id);
-      if (index !== -1) setQueueAndPlay(updatedRoom.queue, index);
+      if (index !== -1) {
+        setRoomTrack(updatedRoom.queue[index]);
+        setQueueAndPlay(updatedRoom.queue, index);
+      }
       sendRoomEvent({
         type: "track_select",
         trackId: track.id,
@@ -439,6 +448,7 @@ const ListeningRoom = ({ roomName: propRoomName, onExit: propOnExit }) => {
   };
 
   const handleExit = () => {
+    setRoomTrack(null);
     onExit();
   };
 

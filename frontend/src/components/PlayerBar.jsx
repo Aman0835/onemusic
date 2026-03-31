@@ -53,7 +53,7 @@ const PlayerBar = ({
 
   return (
     <footer className="w-full h-24 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-2 relative">
-      <div className="h-full grid grid-cols-[auto_1fr_auto] items-center md:gap-8 gap-2">
+      <div className="h-full grid grid-cols-[auto_1fr_auto] items-center md:gap-8 gap-1">
       <div className="min-w-0 flex items-center gap-2 md:gap-3">
         {activeTrack && (
           <>
@@ -82,8 +82,8 @@ const PlayerBar = ({
         )}
       </div>
 
-      <div className="flex flex-col items-center gap-1 w-full max-w-[700px] justify-self-center px-2">
-        <div className="flex items-center gap-3 md:gap-6">
+      <div className="flex flex-col items-center gap-1 w-full md:max-w-[700px] md:justify-self-center px-1 md:px-2">
+        <div className="flex items-center justify-between md:justify-center w-full md:gap-6 px-2 md:px-0">
           <Shuffle
             size={16}
             onClick={() => {
@@ -146,7 +146,7 @@ const PlayerBar = ({
         </div>
 
         {activeTrack && (
-          <div className="flex items-center gap-2 w-full text-[10px] sm:text-xs text-zinc-400">
+          <div className="flex items-center gap-2 w-full text-[10px] sm:text-xs text-zinc-400 px-1">
             <span>{activeTrack.currentTime}</span>
 
             <div

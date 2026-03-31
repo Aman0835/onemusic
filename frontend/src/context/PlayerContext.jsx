@@ -30,10 +30,12 @@ export const PlayerProvider = ({ children }) => {
 
   const [queue, setQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
-  const activeTrack = queue[currentIndex] || null;
-
   const [isRoomMode, setIsRoomMode] = useState(false);
   const isRoomModeRef = useRef(false);
+  const [roomTrack, setRoomTrack] = useState(null);
+  
+  const rawActiveTrack = isRoomMode ? roomTrack : (queue[currentIndex] || null);
+  const activeTrack = rawActiveTrack;
   
   // Suppress immediate autoplay behaviors when migrating states
   const autoPlaySuppressRef = useRef(false);
@@ -513,6 +515,7 @@ export const PlayerProvider = ({ children }) => {
         isRoomMode,
         enterRoomMode,
         exitRoomMode,
+        setRoomTrack,
       }}>
       <YouTubePlayerContainer />
       {children}
