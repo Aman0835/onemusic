@@ -1,4 +1,5 @@
 import {
+    ChevronLeft,
     ChevronRight,
     Lock,
     Mail,
@@ -87,6 +88,14 @@ export default function Signup() {
 
       <div className="w-full max-w-lg bg-black/40 backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 md:p-12 shadow-2xl relative z-10 transition-all duration-500 animate-in fade-in slide-in-from-bottom-8 my-auto leading-relaxed">
         
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 text-zinc-500 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest mb-6 group"
+        >
+          <ChevronLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+          Back
+        </button>
+
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-4 border border-white/10 overflow-hidden">
             <img src="/logo.png" alt="OneMusic Logo" className="w-full h-full object-contain" />
