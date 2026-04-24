@@ -1,3 +1,4 @@
+import { useEffect, Suspense, lazy } from "react";
 import {
     Navigate,
     Route,
@@ -11,22 +12,24 @@ import {
 import { PlayerProvider, usePlayer } from "./context/PlayerContext.jsx";
 import { Analytics } from "@vercel/analytics/react";
 
-import Album from "./components/album.jsx";
-import Artist from "./components/artist.jsx";
-import Home from "./components/home.jsx";
-import Library from "./components/library.jsx";
 import PlayerBar from "./components/PlayerBar.jsx";
-import ListeningRoom from "./components/room/listeningRoom.jsx";
-import RoomLobby from "./components/room/roomLobby.jsx";
-import Login from "./components/user/login.jsx";
-import Signup from "./components/user/signup.jsx";
 import { SidebarProvider, useSidebar } from "./context/SidebarContext";
 import { API_BASE } from "./api/config";
 import { getToken, authHeaders } from "./api/auth";
 
-import AuthCallback from "./auth/AuthCallback.jsx";
 import Sidebar, { SidebarItem } from "./components/sidebar.jsx";
 import "./index.css";
+
+const Album = lazy(() => import("./components/album.jsx"));
+const Artist = lazy(() => import("./components/artist.jsx"));
+const Home = lazy(() => import("./components/home.jsx"));
+const Library = lazy(() => import("./components/library.jsx"));
+const ListeningRoom = lazy(() => import("./components/room/listeningRoom.jsx"));
+const RoomLobby = lazy(() => import("./components/room/roomLobby.jsx"));
+const Login = lazy(() => import("./components/user/login.jsx"));
+const Signup = lazy(() => import("./components/user/signup.jsx"));
+const AuthCallback = lazy(() => import("./auth/AuthCallback.jsx"));
+
 
 import axios from "axios";
 import {
@@ -37,7 +40,6 @@ import {
     Plus,
     Menu
 } from "lucide-react";
-import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addUser, removeUser } from "./components/utils/UserSlice";
 
@@ -145,19 +147,21 @@ const AppContent = () => {
           )}
 
           <main className="flex-1 overflow-y-auto scrollbar-hide">
-          <Routes>
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/callback" element={<AuthCallback />} />
-            <Route path="/" element={<Navigate to="/home" replace />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/library" element={<Library />} />
-            <Route path="/artist" element={<Artist />} />
-            <Route path="/album" element={<Album />} />
-            <Route path="/room" element={<RoomLobby />} />
-            <Route path="/room/:roomId" element={<ListeningRoom />} />
-            <Route path="/Home" element={<Navigate to="/home" replace />} />
-          </Routes>
+            <Suspense fallback={<div className="flex items-center justify-center w-full h-full"><div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div></div>}>
+              <Routes>
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/callback" element={<AuthCallback />} />
+                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/library" element={<Library />} />
+                <Route path="/artist" element={<Artist />} />
+                <Route path="/album" element={<Album />} />
+                <Route path="/room" element={<RoomLobby />} />
+                <Route path="/room/:roomId" element={<ListeningRoom />} />
+                <Route path="/Home" element={<Navigate to="/home" replace />} />
+              </Routes>
+            </Suspense>
           </main>
         </div>
       </div>

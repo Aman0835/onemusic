@@ -14,7 +14,7 @@ const ProfileCard = () => {
         className="flex items-center justify-between w-full md:w-56 bg-white/5 border border-white/10 p-2 md:p-3 rounded-2xl shadow-2xl backdrop-blur-md hover:border-[#04A72E]/30 transition-all duration-300 cursor-pointer"
       >
         {/* Avatar */}
-        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#F9C97C] to-[#f7b733] shadow-lg flex-shrink-0 border-2 border-white/10 group-hover:scale-105 transition-transform overflow-hidden">
+        <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full shadow-lg flex-shrink-0 border-2 border-white/10 group-hover:scale-105 transition-transform overflow-hidden ${!user.photoUrl ? 'bg-gradient-to-br from-[#F9C97C] to-[#f7b733]' : 'bg-black'}`}>
           {user.photoUrl ? (
             <img src={user.photoUrl} referrerPolicy="no-referrer" alt="User Avatar" className="w-full h-full object-cover" />
           ) : (

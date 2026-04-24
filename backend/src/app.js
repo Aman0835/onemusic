@@ -110,6 +110,12 @@ connectDB()
   try {
     await ytmusic.initialize();
     console.log("YT Music Ready ");
+    
+    // Warm up the music controller cache in the background
+    const musicController = require("./controllers/music.controller");
+    if (typeof musicController.warmupCache === 'function') {
+      musicController.warmupCache().catch(err => console.error("Cache warmup failed:", err));
+    }
   } catch (err) {
     console.error("YTMusic Init Error:", err);
   }

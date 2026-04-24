@@ -207,3 +207,21 @@ exports.search = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// WARM-UP CACHE — Automatically populates cache on server start
+exports.warmupCache = async () => {
+  
+  try {
+    // We mock a req/res object just to re-use the existing logic without duplicating it
+    const mockReq = {};
+    const mockRes = { json: () => {}, status: () => ({ json: () => {} }) };
+    
+    // Call them sequentially to avoid spamming the YT Music API too hard at once
+    await exports.home(mockReq, mockRes);
+    await exports.library(mockReq, mockRes);
+    await exports.album(mockReq, mockRes);
+   
+  } catch (err) {
+    console.error("Failed to warm up cache:", err);
+  }
+};

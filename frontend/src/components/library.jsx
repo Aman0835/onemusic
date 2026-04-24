@@ -200,7 +200,7 @@ export default function LibraryPage() {
 const Header = ({ onToggleSearch, user }) => (
   <header className="flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-xl z-20 py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 mb-2 border-b border-white/5">
     <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F9C97C] to-[#f7b733] flex items-center justify-center shadow-lg overflow-hidden border border-white/10 flex-shrink-0">
+      <div className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg overflow-hidden border border-white/10 flex-shrink-0 ${!user?.photoUrl ? 'bg-gradient-to-br from-[#F9C97C] to-[#f7b733]' : 'bg-black'}`}>
         {user?.photoUrl ? (
           <img src={user.photoUrl} referrerPolicy="no-referrer" alt="User" className="w-full h-full object-cover" />
         ) : (
