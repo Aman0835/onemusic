@@ -1,4 +1,4 @@
-import { Headset, X } from "lucide-react";
+import { Headset, X, User } from "lucide-react";
 import { useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import "../index.css";
@@ -48,11 +48,21 @@ export default function Sidebar({ children, isOpen, onClose }) {
             <ProfileCard />
           </div>
         ) : (
-          <NavLink to="/login" className="flex items-center justify-center mb-4">
-            <div className="p-1 md:p-2 text-white hover:text-[#04A72E]">
-              <Button text="Login" />
-            </div>
-          </NavLink>
+          <div className="p-3 md:p-4 flex items-center justify-center w-full">
+            <NavLink to="/login" className="w-full flex justify-center">
+              <div className="w-full md:w-56 bg-white/5 border border-white/10 p-2 md:p-3 rounded-2xl shadow-2xl backdrop-blur-md hover:border-[#04A72E]/50 hover:bg-white/10 transition-all duration-300 cursor-pointer flex items-center gap-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center flex-shrink-0 border-2 border-white/5">
+                  <User size={20} className="text-zinc-400" />
+                </div>
+                <div className="flex flex-col text-left overflow-hidden">
+                  <span className="text-white font-bold text-sm truncate">Guest User</span>
+                  <span className="text-[#04A72E] text-[10px] font-black uppercase tracking-widest mt-0.5 truncate">
+                    Click to Login
+                  </span>
+                </div>
+              </div>
+            </NavLink>
+          </div>
         )}
       </nav>
     </aside>

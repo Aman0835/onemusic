@@ -1,12 +1,13 @@
-import { Download, LayoutGrid, List, Plus, Search, User } from "lucide-react";
+import { LayoutGrid, List, Plus, Search, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { getLibraryData } from "../api/musicData";
 import { usePlayer } from "../context/PlayerContext";
 import Loader from "./loader";
 import SearchBar from "./SearchBar";
 import { useScrollGrab } from "../hooks/useScrollGrab";
 
-const FILTERS = ["Playlists", "Albums", "Artists", "Downloaded"];
+const FILTERS = ["All", "Playlists", "Albums", "Artists"];
 
 function normalizeLibraryItems(payload) {
   const rawItems = Array.isArray(payload) ? payload : payload?.items || [];
@@ -21,7 +22,7 @@ function normalizeLibraryItems(payload) {
       title: item.title || "Untitled",
       creator: item.creator || item.subtitle || "Unknown Artist",
       imageUrl:
-        item.imageUrl ||
+        item.imageUrl ||  
         "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=300&auto=format&fit=crop",
       type: item.type || fallbackType,
       isDownloaded: Boolean(item.isDownloaded),
@@ -46,9 +47,10 @@ function toLibraryItem(track) {
 
 export default function LibraryPage() {
   const { setQueueAndPlay } = usePlayer();
+  const user = useSelector((store) => store.user);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState("Playlists");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [viewMode, setViewMode] = useState("grid");
   const [libraryItems, setLibraryItems] = useState([]);
   const [showSearch, setShowSearch] = useState(false);
@@ -90,14 +92,9 @@ export default function LibraryPage() {
   }, []);
 
   const filteredItems = useMemo(() => {
-    if (activeFilter === "Downloaded") {
-      const downloaded = libraryItems.filter((item) => item.isDownloaded);
-      return downloaded.length ? downloaded : libraryItems;
-    }
-
+    if (activeFilter === "All") return libraryItems;
     const type = activeFilter.slice(0, -1);
-    const match = libraryItems.filter((item) => item.type === type);
-    return match.length ? match : libraryItems;
+    return libraryItems.filter((item) => item.type === type);
   }, [activeFilter, libraryItems]);
 
   const handleSelectFromSearch = (track) => {
@@ -133,7 +130,7 @@ export default function LibraryPage() {
 
   return (
     <div className="text-white p-4 sm:p-6 font-sans flex flex-col pb-8">
-      <Header onToggleSearch={() => setShowSearch((v) => !v)} />
+      <Header onToggleSearch={() => setShowSearch((v) => !v)} user={user} />
 
       <div className="mt-6">
         <FilterPills
@@ -200,23 +197,30 @@ export default function LibraryPage() {
   );
 }
 
-const Header = ({ onToggleSearch }) => (
-  <header className="flex justify-between items-center">
-    <div className="flex items-center gap-4">
-      <div className="bg-purple-600 p-2 rounded-full">
-        <User size={24} />
+const Header = ({ onToggleSearch, user }) => (
+  <header className="flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-xl z-20 py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 mb-2 border-b border-white/5">
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#F9C97C] to-[#f7b733] flex items-center justify-center shadow-lg overflow-hidden border border-white/10 flex-shrink-0">
+        {user?.photoUrl ? (
+          <img src={user.photoUrl} referrerPolicy="no-referrer" alt="User" className="w-full h-full object-cover" />
+        ) : (
+          <span className="text-black font-black text-sm">
+            {user?.firstName?.[0]?.toUpperCase() || <User size={18} className="text-black" />}
+          </span>
+        )}
       </div>
-      <h1 className="text-2xl sm:text-3xl font-bold">Your Library</h1>
+      <h1 className="text-[22px] sm:text-2xl font-bold tracking-tight text-white">Your Library</h1>
     </div>
 
-    <div className="flex items-center gap-4 text-zinc-400">
+    <div className="flex items-center gap-3 sm:gap-4 text-zinc-300">
       <button
         onClick={onToggleSearch}
-        className="hover:text-white transition-colors">
-        <Search size={24} />
+        className="hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/10"
+      >
+        <Search size={22} />
       </button>
-      <button className="hover:text-white transition-colors">
-        <Plus size={28} />
+      <button className="hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/10">
+        <Plus size={26} />
       </button>
     </div>
   </header>
@@ -239,52 +243,51 @@ const FilterPills = ({ activeFilter, setActiveFilter }) => (
   </div>
 );
 
-const LibraryItemCard = ({ item, onClick }) => (
-  <div
-    onClick={onClick}
-    className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2 w-full"
-  >
-    <div className="relative w-full aspect-square overflow-hidden rounded-md shadow-lg">
+const LibraryItemCard = ({ item, onClick }) => {
+  const isArtist = item.type === "Artist";
+  return (
+    <div
+      onClick={onClick}
+      className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2 w-full"
+    >
+      <div className={`relative w-full aspect-square overflow-hidden shadow-lg ${isArtist ? 'rounded-full' : 'rounded-md'}`}>
+        <img
+          src={item.imageUrl}
+          alt={item.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      </div>
+
+      <div className="flex flex-col gap-0.5 w-full text-left mt-1">
+        <h3 className={`font-semibold text-white text-[15px] truncate w-full ${isArtist ? 'text-center' : ''}`}>{item.title}</h3>
+        <p className={`text-[13px] text-zinc-400 truncate w-full ${isArtist ? 'text-center' : ''}`}>
+          {item.type} {item.creator !== "Unknown Artist" && !isArtist ? `• ${item.creator}` : ""}
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const LibraryListItem = ({ item, onClick }) => {
+  const isArtist = item.type === "Artist";
+  return (
+    <div
+      onClick={onClick}
+      className="flex items-center gap-4 p-2.5 mx-1 rounded-md hover:bg-white/5 cursor-pointer transition-colors"
+    >
       <img
         src={item.imageUrl}
         alt={item.title}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        className={`w-14 h-14 object-cover shadow-md flex-shrink-0 ${isArtist ? 'rounded-full' : 'rounded-md'}`}
       />
-      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      {item.isDownloaded && (
-        <div className="absolute bottom-2 right-2 bg-green-500 p-1.5 rounded-full shadow-lg z-10">
-          <Download size={14} className="text-black" />
-        </div>
-      )}
+
+      <div className="flex flex-col min-w-0 flex-grow">
+        <h3 className="font-semibold text-[16px] text-white truncate">{item.title}</h3>
+        <p className="text-[13px] text-zinc-400 truncate mt-0.5">
+          {item.type} {item.creator !== "Unknown Artist" && !isArtist ? `• ${item.creator}` : ""}
+        </p>
+      </div>
     </div>
-
-    <div className="flex flex-col gap-0.5 w-full text-left mt-1">
-      <h3 className="font-semibold text-white text-sm truncate w-full">{item.title}</h3>
-      <p className="text-xs text-zinc-400 truncate w-full">
-        {item.type} - {item.creator}
-      </p>
-    </div>
-  </div>
-);
-
-const LibraryListItem = ({ item, onClick }) => (
-  <div
-    onClick={onClick}
-    className="flex items-center gap-4 p-2 rounded-md hover:bg-zinc-800/80 cursor-pointer"
-  >
-    <img
-      src={item.imageUrl}
-      alt={item.title}
-      className="w-12 h-12 object-cover rounded-md"
-    />
-
-    <div className="flex-grow">
-      <h3 className="font-semibold truncate">{item.title}</h3>
-      <p className="text-sm text-zinc-400 truncate">
-        {item.type} - {item.creator}
-      </p>
-    </div>
-
-    {item.isDownloaded && <Download size={18} className="text-green-500" />}
-  </div>
-);
+  );
+};

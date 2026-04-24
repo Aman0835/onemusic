@@ -11,12 +11,12 @@ const ProfileCard = () => {
     <div className="relative flex flex-col items-center w-full">
       <div 
         onClick={() => setShowMobileLogout(!showMobileLogout)}
-        className="flex items-center justify-center md:justify-between w-full md:w-56 bg-white/5 border border-white/10 p-2 md:p-3 rounded-2xl shadow-2xl backdrop-blur-md hover:border-[#04A72E]/30 transition-all duration-300 cursor-pointer"
+        className="flex items-center justify-between w-full md:w-56 bg-white/5 border border-white/10 p-2 md:p-3 rounded-2xl shadow-2xl backdrop-blur-md hover:border-[#04A72E]/30 transition-all duration-300 cursor-pointer"
       >
         {/* Avatar */}
         <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#F9C97C] to-[#f7b733] shadow-lg flex-shrink-0 border-2 border-white/10 group-hover:scale-105 transition-transform overflow-hidden">
           {user.photoUrl ? (
-            <img src={user.photoUrl} alt="User Avatar" className="w-full h-full object-cover" />
+            <img src={user.photoUrl} referrerPolicy="no-referrer" alt="User Avatar" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-black font-black text-lg">
                {user.firstName?.[0]?.toUpperCase()}
@@ -24,8 +24,8 @@ const ProfileCard = () => {
           )}
         </div>
 
-        {/* User Info (Hidden on Mobile) */}
-        <div className="hidden md:flex flex-col flex-1 mx-3 overflow-hidden">
+        {/* User Info */}
+        <div className="flex flex-col flex-1 mx-3 overflow-hidden text-left">
           <h3 className="text-white font-bold text-sm leading-tight truncate">
             {user.firstName} {user.lastName}
           </h3>

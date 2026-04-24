@@ -65,23 +65,29 @@ function formatSongsFast(songs) {
   }));
 }
 
-// HOME API — 3 sections, each from 2 parallel queries (~40 songs each)
+// HOME API — 5 sections, mimicking Spotify Home Page content
 exports.home = async (req, res) => {
   if (cache.has("home")) return res.json(cache.get("home"));
 
   try {
     await initYT();
 
-    const [newReleases, trending, globalHits] = await Promise.all([
-      searchMulti(["latest hindi songs 2025", "new bollywood songs 2025"]),
+    const [madeForYou, jumpBackIn, topMixes, popularAlbums, newReleases, popularArtists] = await Promise.all([
+      searchMulti(["chill vibes playlist", "lofi hip hop radio"]),
       searchMulti(["trending songs india 2025", "viral hindi songs"]),
-      searchMulti(["top global hits 2025", "best english songs 2025"]),
+      searchMulti(["best pop mixes 2025", "electronic dance mixes"]),
+      searchMulti(["top global hits 2025", "popular music albums"]),
+      searchMulti(["latest hindi songs 2025", "new bollywood songs 2025"]),
+      searchMulti(["top artists global 2025", "best artist hits"]),
     ]);
 
     const result = {
+      madeForYou: formatSongsFast(madeForYou),
+      jumpBackIn: formatSongsFast(jumpBackIn),
+      topMixes: formatSongsFast(topMixes),
+      popularAlbums: formatSongsFast(popularAlbums),
       newReleases: formatSongsFast(newReleases),
-      recentlyPlayed: formatSongsFast(trending),
-      topArtists: formatSongsFast(globalHits),
+      popularArtists: formatSongsFast(popularArtists),
     };
 
     cache.set("home", result);

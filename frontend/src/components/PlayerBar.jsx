@@ -28,6 +28,7 @@ const PlayerBar = ({
 }) => {
   const [oldVolume, setOldVolume] = useState(66);
   const [toast, setToast] = useState(null);
+  const [showVolumePopup, setShowVolumePopup] = useState(false);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -175,9 +176,9 @@ const PlayerBar = ({
 
       <div className="flex justify-end items-center gap-2 md:gap-4">
         {/* Mobile: Vertical Popup Slider */}
-        <div className="relative group md:hidden flex items-center justify-center">
+        <div className="relative md:hidden flex items-center justify-center">
           <button
-            onClick={toggleMute}
+            onClick={() => setShowVolumePopup(!showVolumePopup)}
             className="p-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 transition active:scale-95"
           >
             {volume === 0 ? (
@@ -188,7 +189,7 @@ const PlayerBar = ({
           </button>
 
           {/* Vertical Volume Slider Popup */}
-          <div className="absolute bottom-[120%] right-0 w-10 h-32 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-50">
+          <div className={`absolute bottom-[120%] right-0 w-10 h-32 bg-zinc-900/95 backdrop-blur-xl border border-white/10 rounded-full flex flex-col items-center justify-center shadow-2xl transition-all duration-300 transform z-50 ${showVolumePopup ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2'}`}>
             <input
               type="range"
               min="0"

@@ -4,10 +4,12 @@ import {
     BrowserRouter as Router,
     Routes,
     useLocation,
+    Link,
 } from "react-router-dom";
 
 
 import { PlayerProvider, usePlayer } from "./context/PlayerContext.jsx";
+import { Analytics } from "@vercel/analytics/react";
 
 import Album from "./components/album.jsx";
 import Artist from "./components/artist.jsx";
@@ -123,15 +125,22 @@ const AppContent = () => {
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Mobile Header (Hamburger) */}
+          {/* Mobile Header */}
           {!hideSidebar && (
-            <div className="md:hidden flex items-center p-4">
+            <div className="md:hidden relative flex items-center justify-between p-4 pb-2 min-h-[60px]">
               <button 
                 onClick={toggleSidebar}
-                className="p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95"
+                className="p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors active:scale-95 z-10"
               >
                 <Menu size={24} />
               </button>
+              
+              <Link 
+                to="/home" 
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 mt-1 flex items-center gap-2 cursor-pointer group"
+              >
+                <span className="text-[#1DB954] font-bold text-[22px] tracking-tight group-hover:text-[#1ed760] transition-colors">OneMusic</span>
+              </Link>
             </div>
           )}
 
@@ -178,13 +187,16 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Router>
-      <PlayerProvider>
-        <SidebarProvider>
-          <AppContent />
-        </SidebarProvider>
-      </PlayerProvider>
-    </Router>
+    <>
+      <Router>
+        <PlayerProvider>
+          <SidebarProvider>
+            <AppContent />
+          </SidebarProvider>
+        </PlayerProvider>
+      </Router>
+      <Analytics />
+    </> 
   );
 };
 

@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getHomeData } from "../api/musicData";
@@ -14,12 +13,14 @@ const currentYear = new Date().getFullYear();
 const lastYear = currentYear - 1;
 
 import Loader from "../components/loader";
-import { useScrollGrab } from "../hooks/useScrollGrab";
 
 const Home = () => {
+  const [madeForYou, setMadeForYou] = useState([]);
+  const [jumpBackIn, setJumpBackIn] = useState([]);
+  const [topMixes, setTopMixes] = useState([]);
+  const [popularAlbums, setPopularAlbums] = useState([]);
   const [newReleasesItems, setNewReleasesItems] = useState([]);
-  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
-  const [topArtists, setTopArtists] = useState([]);
+  const [popularArtists, setPopularArtists] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,9 +31,12 @@ const Home = () => {
       try {
         setIsLoading(true);
         const data = await getHomeData();
+        setMadeForYou(data.madeForYou || []);
+        setJumpBackIn(data.jumpBackIn || []);
+        setTopMixes(data.topMixes || []);
+        setPopularAlbums(data.popularAlbums || []);
         setNewReleasesItems(data.newReleases || []);
-        setRecentlyPlayed(data.recentlyPlayed || []);
-        setTopArtists(data.topArtists || []);
+        setPopularArtists(data.popularArtists || []);
       } catch (e) {
         console.error("Failed to fetch home data", e);
       } finally {
@@ -41,13 +45,13 @@ const Home = () => {
     })();
   }, []);
 
-  function AlbumCard({ item, onSelect }) {
+  function AlbumCard({ item, onSelect, isArtist }) {
     return (
       <div
         onClick={() => onSelect(item)}
-        className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2 w-full"
+        className="bg-transparent hover:bg-white/5 p-2 sm:p-3 rounded-md transition-all duration-200 cursor-pointer flex flex-col group gap-2 h-full"
       >
-        <div className="relative w-full aspect-square overflow-hidden rounded-md shadow-lg">
+        <div className={`relative w-full aspect-square overflow-hidden shadow-lg ${isArtist ? 'rounded-full' : 'rounded-md'}`}>
           <img
             src={item.imageUrl}
             alt={item.title}
@@ -57,23 +61,25 @@ const Home = () => {
         </div>
         <div className="flex flex-col gap-0.5 w-full text-left mt-1">
           <h3 className="font-semibold text-white text-sm truncate w-full">{item.title}</h3>
-          <p className="text-xs text-zinc-400 truncate w-full">{item.subtitle}</p>
+          <p className="text-xs text-zinc-400 line-clamp-2 w-full">{item.subtitle}</p>
         </div>
       </div>
     );
   }
 
-  function Cards({ items = [], onSelect }) {
+  function Cards({ items = [], onSelect, isArtist = false }) {
     return (
       <div 
-        className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3 sm:gap-4 lg:gap-5 pb-4"
+        className="flex overflow-x-auto gap-3 sm:gap-4 lg:gap-5 pb-4 scrollbar-hide snap-x"
       >
         {items.map((item) => (
-          <AlbumCard 
-            key={item.id}
-            item={item} 
-            onSelect={(i) => onSelect(i)} 
-          />
+          <div key={item.id} className="snap-start min-w-[140px] w-[140px] sm:min-w-[160px] sm:w-[160px] md:min-w-[180px] md:w-[180px] flex-shrink-0">
+            <AlbumCard 
+              item={item} 
+              onSelect={(i) => onSelect(i)} 
+              isArtist={isArtist}
+            />
+          </div>
         ))}
       </div>
     );
@@ -130,26 +136,11 @@ const Home = () => {
         </Card>
       </section>
 
-      {recentlyPlayed.length > 0 && (
+      {newReleasesItems.length > 0 && (
         <div className="mb-2">
           <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
-            Recently Played
+            New Releases
           </h2>
-          <Cards
-            items={recentlyPlayed}
-            onSelect={(item) => {
-              const index = recentlyPlayed.findIndex((i) => i.id === item.id);
-              setQueueAndPlay(recentlyPlayed, index);
-            }}
-          />
-        </div>
-      )}
-
-      <div className="mb-2">
-        <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
-          New Releases ({currentYear} / {lastYear})
-        </h2>
-        {newReleasesItems.length > 0 ? (
           <Cards 
             items={newReleasesItems} 
             onSelect={(item) => {
@@ -157,21 +148,81 @@ const Home = () => {
               setQueueAndPlay(newReleasesItems, index);
             }} 
           />
-        ) : (
-          <div className="text-center py-10">
-            <p className="text-zinc-500">No new releases available.</p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {topArtists.length > 0 && (
+      {jumpBackIn.length > 0 && (
         <div className="mb-2">
-          <h2 className="font-bold text-2xl text-white ml-2.5 mt-8 mb-4">Artists</h2>
-          <Cards 
-            items={topArtists} 
+          <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
+            Jump back in
+          </h2>
+          <Cards
+            items={jumpBackIn}
             onSelect={(item) => {
-              const index = topArtists.findIndex((i) => i.id === item.id);
-              setQueueAndPlay(topArtists, index);
+              const index = jumpBackIn.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(jumpBackIn, index);
+            }}
+          />
+        </div>
+      )}
+
+      {madeForYou.length > 0 && (
+        <div className="mb-2">
+          <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
+            Made For You
+          </h2>
+          <Cards
+            items={madeForYou}
+            onSelect={(item) => {
+              const index = madeForYou.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(madeForYou, index);
+            }}
+          />
+        </div>
+      )}
+
+      {topMixes.length > 0 && (
+        <div className="mb-2">
+          <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
+            Your top mixes
+          </h2>
+          <Cards
+            items={topMixes}
+            onSelect={(item) => {
+              const index = topMixes.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(topMixes, index);
+            }}
+          />
+        </div>
+      )}
+
+      {popularAlbums.length > 0 && (
+        <div className="mb-2">
+          <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
+            Popular albums
+          </h2>
+          <Cards
+            items={popularAlbums}
+            onSelect={(item) => {
+              const index = popularAlbums.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(popularAlbums, index);
+            }}
+          />
+        </div>
+      )}
+
+
+      {popularArtists.length > 0 && (
+        <div className="mb-8">
+          <h2 className="font-bold text-2xl text-white ml-2.5 mt-2">
+            Popular Artists
+          </h2>
+          <Cards 
+            items={popularArtists} 
+            isArtist={true}
+            onSelect={(item) => {
+              const index = popularArtists.findIndex((i) => i.id === item.id);
+              setQueueAndPlay(popularArtists, index);
             }} 
           />
         </div>

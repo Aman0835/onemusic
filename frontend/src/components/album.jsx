@@ -1,4 +1,4 @@
-import { Download, Heart, MoreHorizontal, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAlbumData } from "../api/musicData";
 import { usePlayer } from "../context/PlayerContext";
@@ -66,22 +66,13 @@ export default function AlbumPage() {
             </div>
           </header>
 
-          <div className="mt-8 flex items-center gap-6 relative">
-            <button className="text-zinc-400 hover:text-white transition-colors">
-              <Heart size={32} />
-            </button>
-            <button className="text-zinc-400 hover:text-white transition-colors">
-              <Download size={32} />
-            </button>
-            <button className="text-zinc-400 hover:text-white transition-colors">
-              <MoreHorizontal size={32} />
-            </button>
+          <div className="mt-8 flex items-center justify-end min-h-[64px]">
             <button
               onClick={() => {
                 if (tracks.length) setQueueAndPlay(tracks, 0);
               }}
               disabled={!tracks.length}
-              className="absolute right-0 bg-green-500 text-black p-4 rounded-full shadow-lg shadow-black/40 transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+              className="bg-green-500 text-black p-4 rounded-full shadow-lg shadow-black/40 transition-transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
               <Play size={32} className="fill-current" />
             </button>
           </div>
@@ -111,9 +102,6 @@ export default function AlbumPage() {
                   <p className="text-xs text-zinc-400 truncate mt-0.5">
                     {track.subtitle || album.artist}
                   </p>
-                </div>
-                <div className="text-zinc-400 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-                  <MoreHorizontal size={18} className="hover:text-white" />
                 </div>
               </div>
             ))}
