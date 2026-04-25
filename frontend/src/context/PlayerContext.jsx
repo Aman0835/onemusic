@@ -288,7 +288,7 @@ export const PlayerProvider = ({ children }) => {
     setCurrentIndex(0);
   }, []);
 
-  const setQueueAndPlay = useCallback((tracks, index) => {
+  const setQueueAndPlay = useCallback((tracks, index, startSeconds = 0) => {
     if (!Array.isArray(tracks) || tracks.length === 0) return;
     const selected = tracks[index];
     const filtered = tracks.filter((track) => track?.id);
@@ -300,7 +300,11 @@ export const PlayerProvider = ({ children }) => {
     if (playerReady && playerRef.current && targetTrack?.id) {
       try {
         playerRef.current.unMute();
-        playerRef.current.loadVideoById(targetTrack.id);
+        if (startSeconds > 0) {
+          playerRef.current.loadVideoById({ videoId: targetTrack.id, startSeconds });
+        } else {
+          playerRef.current.loadVideoById(targetTrack.id);
+        }
         playerRef.current.playVideo();
       } catch (e) {
         console.warn("Immediate play failed", e);

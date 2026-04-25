@@ -186,11 +186,8 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
       const index = syncedQueue.findIndex((track) => track.id === payload.trackId);
       if (index !== -1) {
         setRoomTrack(syncedQueue[index]);
-        setQueueAndPlay(syncedQueue, index);
-        // Compensate for message travel time if starting a new track
-        if (delay > 0.1) {
-          setTimeout(() => seekToSeconds(delay + 0.1), 800);
-        }
+        const seekTime = delay > 0.1 ? delay + 0.1 : 0;
+        setQueueAndPlay(syncedQueue, index, seekTime);
       }
       return;
     }
@@ -268,8 +265,7 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
           const idx = syncQueue.findIndex((t) => t.id === payload.trackId);
           if (idx !== -1) {
             setRoomTrack(syncQueue[idx]);
-            setQueueAndPlay(syncQueue, idx);
-            setTimeout(() => seekWithGuard(targetTime), 700);
+            setQueueAndPlay(syncQueue, idx, targetTime);
           }
         } else {
           if (shouldPlay) seekWithGuard(targetTime);
