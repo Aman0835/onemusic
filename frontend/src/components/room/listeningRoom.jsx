@@ -55,7 +55,7 @@ const ListeningRoom = ({ onExit: propOnExit }) => {
   );
   const user = useSelector((state) => state.user);
   const userId = user?.id || user?._id;
-  const roomWsUrl = `${ROOM_WS_BASE}/room/${encodeURIComponent(roomId)}?userId=${clientIdRef.current}`;
+  const roomWsUrl = `${ROOM_WS_BASE}/room/${encodeURIComponent(roomId)}?userId=${userId || clientIdRef.current}`;
 
   const {
     setQueueAndPlay,

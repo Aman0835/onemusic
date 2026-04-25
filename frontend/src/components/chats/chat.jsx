@@ -49,9 +49,11 @@ const Chat = ({ roomName }) => {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
+    const currentUserId = user?.id || user?._id || "anonymous";
+
     const messagePayload = {
       roomId: roomName,
-      senderId: user?.id || "anonymous",
+      senderId: currentUserId,
       senderName: user?.firstName || "Unknown",
       senderPhotoUrl: user?.photoUrl || null,
       text: input,
@@ -110,7 +112,8 @@ const Chat = ({ roomName }) => {
         <p className="text-center text-xs text-gray-500 mt-20">No messages yet</p>
       ) : (
         messages.map((msg, i) => {
-          const isMe = msg.senderId === (user?.id || "anonymous") || msg.senderName === (user?.firstName || "Guest");
+          const currentUserId = user?.id || user?._id;
+          const isMe = currentUserId ? msg.senderId === currentUserId : msg.senderName === (user?.firstName || "Guest");
           const photoSrc = msg.senderPhotoUrl || (isMe && user?.photoUrl ? user.photoUrl : `https://ui-avatars.com/api/?name=${msg.senderName || "U"}&background=random`);
           
           return (
@@ -119,7 +122,7 @@ const Chat = ({ roomName }) => {
               <div
                 className={`px-3 py-1.5 text-sm rounded-2xl text-white break-words whitespace-pre-wrap ${
                   isMe
-                    ? "bg-blue-600 rounded-br-sm"
+                    ? "bg-[#04A72E] rounded-br-sm"
                     : "bg-zinc-800 rounded-bl-sm"
                 }`}
               >
