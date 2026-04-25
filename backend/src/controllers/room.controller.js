@@ -125,12 +125,22 @@ const deleteMusicFromQueue = async (req, res) => {
 
 const getRoomDetails = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user._id;
 
   try {
     const room = await Room.findById(id)
       .populate("host", "firstName lastName _id photoUrl")
       .populate("activeMembers", "firstName lastName _id photoUrl");
     if (!room) return res.status(404).json({ error: "Room not found" });
+
+    // Add user to activeMembers if not present (for share links & QR codes)
+    const isMember = room.activeMembers.some(member => member._id.toString() === userId.toString());
+    if (!isMember) {
+      room.activeMembers.push(userId);
+      await room.save();
+      // Repopulate activeMembers after pushing
+      await room.populate("activeMembers", "firstName lastName _id photoUrl");
+    }
 
     res.json(room);
   } catch (err) {

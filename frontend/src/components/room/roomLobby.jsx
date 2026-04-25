@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Trash2, Plus, Users, Search, DoorOpen, LayoutGrid, List } from "lucide-react";
+import { Trash2, Plus, Users, Search, DoorOpen, LayoutGrid, List, QrCode, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import {
   getMyRooms,
   createRoomAPI,
@@ -21,6 +22,7 @@ export default function RoomLobby() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     const userId = user?.id || user?._id;
@@ -75,6 +77,29 @@ export default function RoomLobby() {
       navigate(`/room/${room._id}`);
     } catch (e) {
       setError("Room not found. Check the name and try again.");
+    }
+  };
+
+  const handleScan = async (result) => {
+    if (!result) return;
+    const text = Array.isArray(result) ? result[0]?.rawValue : result;
+    if (typeof text !== 'string') return;
+    
+    try {
+      let roomIdToJoin = text;
+      try {
+        const url = new URL(text);
+        const parts = url.pathname.split('/');
+        roomIdToJoin = parts[parts.length - 1];
+      } catch (e) {
+        // Not a URL, use it directly
+      }
+      
+      setShowScanner(false);
+      navigate(`/room/${roomIdToJoin}`);
+    } catch (e) {
+      setError("Failed to parse QR code.");
+      setShowScanner(false);
     }
   };
 
@@ -158,9 +183,9 @@ export default function RoomLobby() {
             </p>
 
             <div className="space-y-4">
-              <div className="relative group">
+              <div className="relative group flex items-center">
                 <input
-                  className="w-full bg-black/40 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 p-4 rounded-2xl outline-none transition-all placeholder:text-zinc-600"
+                  className="w-full bg-black/40 border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 p-4 pr-12 rounded-2xl outline-none transition-all placeholder:text-zinc-600"
                   placeholder="Enter exact room name..."
                   value={joinName}
                   onChange={(e) => {
@@ -169,6 +194,13 @@ export default function RoomLobby() {
                   }}
                   onKeyDown={(e) => e.key === "Enter" && joinRoom()}
                 />
+                <button
+                  onClick={() => setShowScanner(true)}
+                  className="absolute right-3 p-2 text-zinc-500 hover:text-blue-500 transition-colors"
+                  title="Scan QR Code"
+                >
+                  <QrCode size={20} />
+                </button>
               </div>
 
               {error && <p className="text-red-400 text-xs mt-1 px-1">{error}</p>}
@@ -304,6 +336,46 @@ export default function RoomLobby() {
                 >
                   Maybe later
                 </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {showScanner &&
+        createPortal(
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
+            <div className="bg-[#111] border border-white/10 w-full max-w-md rounded-3xl shadow-2xl relative overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center p-6 border-b border-white/5">
+                <h2 className="text-xl font-black text-white flex items-center gap-2">
+                  <QrCode className="text-blue-500" size={24} />
+                  Scan to Join
+                </h2>
+                <button 
+                  onClick={() => setShowScanner(false)}
+                  className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="p-6 bg-black relative">
+                <div className="aspect-square w-full max-w-xs mx-auto rounded-2xl overflow-hidden border-2 border-dashed border-blue-500/50 relative">
+                  <Scanner
+                    onScan={handleScan}
+                    onError={(e) => console.error(e)}
+                    components={{
+                      audio: false,
+                      finder: false,
+                    }}
+                    styles={{
+                      container: { width: "100%", height: "100%" },
+                    }}
+                  />
+                  <div className="absolute inset-0 border-4 border-blue-500/20 rounded-2xl pointer-events-none"></div>
+                </div>
+                <p className="text-center text-zinc-500 text-sm mt-6">
+                  Point your camera at a room's QR code.
+                </p>
               </div>
             </div>
           </div>,
