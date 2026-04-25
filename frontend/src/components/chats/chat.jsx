@@ -53,6 +53,7 @@ const Chat = ({ roomName }) => {
       roomId: roomName,
       senderId: user?.id || "anonymous",
       senderName: user?.firstName || "Unknown",
+      senderPhotoUrl: user?.photoUrl || null,
       text: input,
     };
 
@@ -108,19 +109,26 @@ const Chat = ({ roomName }) => {
       {messages.length === 0 ? (
         <p className="text-center text-xs text-gray-500 mt-20">No messages yet</p>
       ) : (
-        messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`max-w-[85%] px-3 py-1.5 text-sm rounded-2xl text-white break-words whitespace-pre-wrap ${
-              msg.senderName === (user?.firstName || "Guest")
-                ? "self-end bg-blue-600 rounded-tr-sm"
-                : "self-start bg-zinc-800 rounded-tl-sm"
-            }`}
-          >
-            <span className="font-bold mr-1">{msg.senderName}:</span>
-            {msg.text}
-          </div>
-        ))
+        messages.map((msg, i) => {
+          const isMe = msg.senderId === (user?.id || "anonymous") || msg.senderName === (user?.firstName || "Guest");
+          const photoSrc = msg.senderPhotoUrl || (isMe && user?.photoUrl ? user.photoUrl : `https://ui-avatars.com/api/?name=${msg.senderName || "U"}&background=random`);
+          
+          return (
+            <div key={i} className={`flex items-end gap-2 max-w-[85%] ${isMe ? "self-end flex-row-reverse" : "self-start"}`}>
+              <img src={photoSrc} alt={msg.senderName} className="w-6 h-6 rounded-full shrink-0" />
+              <div
+                className={`px-3 py-1.5 text-sm rounded-2xl text-white break-words whitespace-pre-wrap ${
+                  isMe
+                    ? "bg-blue-600 rounded-br-sm"
+                    : "bg-zinc-800 rounded-bl-sm"
+                }`}
+              >
+                {!isMe && <div className="font-bold text-xs text-zinc-400 mb-0.5">{msg.senderName}</div>}
+                {msg.text}
+              </div>
+            </div>
+          );
+        })
       )}
 
     </div>

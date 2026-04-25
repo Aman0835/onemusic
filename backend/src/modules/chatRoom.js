@@ -3,6 +3,7 @@ const  mongoose =require("mongoose");
 const ChatMessageSchema = new mongoose.Schema({
   senderId: String,
   senderName: String,
+  senderPhotoUrl: String,
   text: String,
   createdAt: { type: Date, default: Date.now }
 });
